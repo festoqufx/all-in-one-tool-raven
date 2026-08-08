@@ -16,7 +16,7 @@ const urlRegex = /((https?:\/\/|www\.)[^\s/$.?#].[^\s]*)/gi;
  * Handles URLs starting with http://, https://, and www.
  *
  * @example
- * <AutoLinkText text="Visit www.example.com or https://forhadakhan.com" />
+ * <AutoLinkText text="Visit www.example.com or https://ferdinandestoque.com/" />
  */
 const AutoLinkText: React.FC<AutoLinkTextProps> = ({ text }) => {
   const parts: React.ReactNode[] = [];
@@ -39,7 +39,7 @@ const AutoLinkText: React.FC<AutoLinkTextProps> = ({ text }) => {
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-blue-500 hover:underline underline-offset-4"
+        className="font-medium text-black underline decoration-black/30 underline-offset-4 hover:decoration-black"
       >
         {url}
       </a>

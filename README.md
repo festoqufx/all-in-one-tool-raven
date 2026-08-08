@@ -1,6 +1,6 @@
-# Tools
+# All in one Tools
 
-**Tools** (by [Forhad Khan](https://github.com/forhadakhan)) is a web-based application that integrates multiple essential utilities into a single, user-friendly platform. It enhances productivity by offering quick access to various tools, eliminating the need for multiple standalone apps.
+**All in one Tools** (by [Ravenom](https://ferdinandestoque.com/)) is a web-based application that integrates multiple essential utilities into a single, user-friendly platform. It enhances productivity by offering quick access to various tools, eliminating the need for multiple standalone apps.
 
 ## Available Tools
 

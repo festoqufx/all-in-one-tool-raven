@@ -8,7 +8,7 @@ import {
     MY_IP_ROUTE,
 } from "@/lib/routes";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://tools.forhadakhan.com';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://ferdinandestoque.com';
 
 
 export default function sitemap(): MetadataRoute.Sitemap {

@@ -3,23 +3,23 @@
  * DESC: Defines the footer component for the application.
  */
 
-import { FK_WEBSITE } from "@/lib/constants";
+import { WEBSITE_URL } from "@/lib/constants";
 import InstallPWAButton from "@/components/general/InstallPWAButton";
 
 export function Footer() {
   return (
-    <footer className="py-3 2xl:py-6 text-center text-xs mt-auto flex flex-col md:flex-row items-center justify-center md:justify-between gap-2">
+    <footer className="mt-auto flex flex-col items-center justify-center gap-3 py-4 text-center text-xs md:flex-row md:justify-between 2xl:py-6">
       <InstallPWAButton />
-      <div className="bg-black p-2 px-4 rounded-full inline-block shadow-lg hover:shadow-xl transition-shadow duration-300">
-        <p className="text-gray-300 text-xs">
+      <div className="inline-block rounded-full border border-black/20 bg-black px-4 py-2 shadow-sm transition-shadow duration-300 hover:shadow-lg">
+        <p className="text-xs text-gray-200">
           &copy; {new Date().getFullYear()}{" "}
           <a
-            href={FK_WEBSITE}
+            href={WEBSITE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:underline underline-offset-4 transition-colors duration-300 font-medium"
+            className="font-medium text-white underline-offset-4 transition-colors duration-300 hover:text-gray-300 hover:underline"
           >
-            RAVENOM
+            Ravenom
           </a>
           . All rights reserved.
         </p>

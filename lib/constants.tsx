@@ -1,2 +1,1 @@
-
-export const FK_WEBSITE = process.env.NEXT_PUBLIC_FK_WEBSITE || "https://forhadakhan.com";
+export const WEBSITE_URL = process.env.NEXT_PUBLIC_WEBSITE_URL || "https://ferdinandestoque.com/";

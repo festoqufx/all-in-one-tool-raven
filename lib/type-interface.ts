@@ -4,6 +4,7 @@ export interface AppLinkProps {
     href: string;
     icon?: string;
     label: string;
+    description?: string;
 }
 
 export interface ITabsData {

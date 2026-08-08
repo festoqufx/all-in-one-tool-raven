@@ -1,7 +1,7 @@
 "use client";
 
 import { QrCodeIcon } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useRef } from 'react';
 import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
 
 /**
@@ -10,7 +10,7 @@ import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
 const MissingQRData = () => (
     <div className="flex flex-col items-center space-y-4 my-8">
         <QrCodeIcon strokeWidth={1.5} size={250} className="text-gray-300 border border-slate-300 border-dashed rounded-md mt-4" />
-        <p className="bg-black/70 text-white font-bold py-2 px-4 rounded text-sm my-4 w-full text-center">
+        <p className="w-full rounded-full border border-black/10 bg-black px-4 py-2 text-center text-sm font-semibold text-white">
             Missing QR Content
         </p>
     </div>
@@ -75,16 +75,7 @@ interface QRCodeDownloadProps {
  * />
  */
 const QRCode: React.FC<QRCodeDownloadProps> = (props) => {
-    const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
-
-    // Effect to capture the canvas after rendering
-    useEffect(() => {
-        // Find the canvas element used for QR code rendering
-        const canvasElement = document.querySelector('canvas');
-        if (canvasElement) {
-            setCanvas(canvasElement as HTMLCanvasElement);
-        }
-    }, [props.value, props.size, props.bgColor, props.fgColor, props.level, props.marginSize]);
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
     /**
      * Initiates the download of the QR code image.
@@ -92,8 +83,8 @@ const QRCode: React.FC<QRCodeDownloadProps> = (props) => {
      * @param fileName - The name of the file to be downloaded.
      */
     const downloadQRCode = (fileName: string) => {
-        if (canvas) {
-            const dataURL = canvas.toDataURL('image/png');
+        if (canvasRef.current) {
+            const dataURL = canvasRef.current.toDataURL('image/png');
             const a = document.createElement('a');
             a.download = fileName;
             a.href = dataURL;
@@ -109,6 +100,7 @@ const QRCode: React.FC<QRCodeDownloadProps> = (props) => {
             {/* for download */}
             <QRCodeCanvas
                 {...props}
+                ref={canvasRef}
                 size={1000}
                 bgColor={props.bgColor || '#ffffff'}
                 fgColor={props.fgColor || '#000000'}
@@ -128,7 +120,7 @@ const QRCode: React.FC<QRCodeDownloadProps> = (props) => {
             />
             {/* Button to download the QR code */}
             <button
-                className="bg-black hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm my-4 w-full text-center"
+                className="my-4 w-full rounded-full border border-black bg-black px-4 py-2 text-center text-sm font-semibold text-white hover:bg-white hover:text-black"
                 onClick={() => downloadQRCode('qr-code.png')}
             >
                 Download QR Code

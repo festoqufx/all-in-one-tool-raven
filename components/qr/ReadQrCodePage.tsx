@@ -26,7 +26,7 @@ export default function ReadQrCodePage() {
 
     return (
         <div className="p-4 max-w-4xl w-full mx-auto">
-            <Card className="w-full max-w-xl mx-auto bg-white/90">
+            <Card className="mx-auto w-full max-w-xl bg-white/90 shadow-sm">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <QrCodeIcon className="w-6 h-6" />
@@ -41,12 +41,12 @@ export default function ReadQrCodePage() {
                             <PasteFile processFile={processFile} setErrorMessage={setErrorMessage} />
                         </div>
                         {/* Instructions */}
-                        <p className="text-xs md:text-sm text-gray-500 text-center">
+                        <p className="text-center text-xs text-black/60 md:text-sm">
                             Drag and drop an image anywhere on the page, <br />
                             or paste an image of a QR code
-                            <kbd className="bg-black mx-1 rounded px-1 text-gray-300">Ctrl</kbd>
+                            <kbd className="mx-1 rounded border border-black/10 bg-black px-1 text-gray-300">Ctrl</kbd>
                             +
-                            <kbd className="bg-black mx-1 rounded px-1 text-gray-300">V</kbd>.
+                            <kbd className="mx-1 rounded border border-black/10 bg-black px-1 text-gray-300">V</kbd>.
                         </p>
                     </div>
                     {/* Display error messages */}
@@ -56,17 +56,17 @@ export default function ReadQrCodePage() {
 
             {/* Display QR code data */}
             {qrData && (
-                <article className="mt-4 lg:mt-8 rounded-xl border border-gray-300">
-                    <div className="flex border-b border-gray-300">
+                <article className="mt-4 rounded-2xl border border-black/15 bg-white/90 lg:mt-8">
+                    <div className="flex border-b border-black/10">
                         <button
                             onClick={() => setActiveTab('formatted')}
-                            className={`py-2 px-4 text-sm font-medium ${activeTab === 'formatted' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-gray-900'}`}
+                            className={`px-4 py-2 text-sm font-medium ${activeTab === 'formatted' ? 'border-b-2 border-black text-black' : 'text-black/55 hover:text-black'}`}
                         >
                             Formatted Data
                         </button>
                         <button
                             onClick={() => setActiveTab('raw')}
-                            className={`py-2 px-4 text-sm font-medium ${activeTab === 'raw' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-gray-900'}`}
+                            className={`px-4 py-2 text-sm font-medium ${activeTab === 'raw' ? 'border-b-2 border-black text-black' : 'text-black/55 hover:text-black'}`}
                         >
                             Raw Data
                         </button>

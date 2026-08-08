@@ -6,14 +6,14 @@ import React from 'react';
 
 export const LogoIcon = ({ className }: { className?: string }) => {
     return (
-        <BoxesIcon className={cn("w-12 h-14", className)} strokeWidth={1} />
+        <BoxesIcon className={cn("h-5 w-5", className)} strokeWidth={1.8} />
     )
 
 }
 export const LogoLink = ({ className }: { className?: string }) => {
     return (
         <Link href="/" className={cn("", className)}>
-            <LogoIcon className={cn("fill-gray-950 text-gray-950", className)} />
+            <LogoIcon className={cn("text-black", className)} />
         </Link>
     )
 }

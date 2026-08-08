@@ -24,14 +24,12 @@ export default function RootLayout({
       </head>
       <body
         className={cn(
-          "min-h-screen flex flex-col antialiased bg-gray-50 px-2 md:px-4",
+          "min-h-screen flex flex-col antialiased px-3 md:px-6",
           ...Object.values(fontVariables) // Spread the values of fontVariables
         )}
-        style={{ minHeight: '100vh' }}
+        style={{ minHeight: "100vh" }}
       >
-        <div className="flex-grow">
-          {children}
-        </div>
+        <div className="mx-auto flex w-full max-w-7xl flex-grow flex-col">{children}</div>
 
         <Footer />
       </body>

@@ -1,10 +1,8 @@
 // app/qr-code/layout.tsx
 
-import HomeLink from '@/components/HomeLink';
-import { getAppLinkById } from '@/lib/apps-data';
 import { ILinkTabsData } from "@/lib/type-interface";
-import { DynamicIcon } from '@/components/ui/DynamicIcon';
 import { GenerateLinkTabs } from '@/components/qr/Tabs';
+import ToolSectionHeader from "@/components/ToolSectionHeader";
 
 
 /**
@@ -25,25 +23,15 @@ const tabs: ILinkTabsData[] = [
  * @returns {JSX.Element} - The rendered layout component.
  */
 export default function QrCodeLayout({ children }: { children: React.ReactNode }) {
-    // Retrieve application link details based on the 'qr-code' id
-    const appLink = getAppLinkById('qr-code');
-
     return (
-        <>
-            <header className="container flex items-center space-x-4 p-4">
-                <HomeLink iconOnly={true} />
-                <h1 className="text-lg lg:text-xl font-semibold flex items-center gap-2">
-                    {/* Render dynamic icon and application label */}
-                    <DynamicIcon name={appLink?.icon} defaultIcon="BoxIcon" />
-                    {appLink?.label}
-                </h1>
-            </header>
-            <main>
+        <main className="container mx-auto w-full">
+            <ToolSectionHeader appId="qr-code" />
+            <section>
                 {/* Render navigation tabs */}
                 <GenerateLinkTabs tabs={tabs} />
                 {/* Render child components */}
                 {children}
-            </main>
-        </>
+            </section>
+        </main>
     );
 }

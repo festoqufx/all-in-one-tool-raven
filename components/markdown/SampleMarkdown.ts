@@ -20,7 +20,7 @@ You can format text as **bold**, _italic_, or **_both!_**.
 If you need to strike through something, feel free to use ~~strikethrough~~.
 You can use \`html\` for additional formatting, such as <u>underlined text</u>.
 
-There's also [links](https://tools.forhadakhan.com), and
+There's also [links](https://ferdinandestoque.com/), and
 > Block Quotes!
 
 And if you want to explore further, you can even create tables:

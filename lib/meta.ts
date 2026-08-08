@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 
-export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://tools.forhadakhan.com";
-export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@forhadakhan.com";
-export const TITLE = "Tools by Forhad Khan";
-export const SHORT_NAME = "Tools";
-export const DESCRIPTION = "Tools by Forhad Khan is an all-in-one app offering essential tools seamlessly combined in one convenient web application for enhanced productivity.";
+export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://ferdinandestoque.com";
+export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "hello@ferdinandestoque.com";
+export const TITLE = "All in one Tools";
+export const SHORT_NAME = "All in one Tools";
+export const DESCRIPTION = "All in one Tools by Ravenom is a minimalist toolkit that brings essential daily utilities into one fast and focused web application.";
 export const KEYWORDS = [
-    "all-in-one tools app", "online productivity tools", "essential online tools", "toolkit app", "tools by Forhad Khan", 
+    "all-in-one tools app", "online productivity tools", "essential online tools", "toolkit app", "all in one tools by Ravenom", 
     "QR code generator", "QR code scanner", "QR code reader", "QR code encoder", "QR code decoder", "QR code app", 
     "text editor", "markdown editor", "online text editor", "live text editor", "markdown text editor app", 
     "IP address lookup", "IP address details", "my IP address", "IP insights", "domain IP lookup", "IP address tool",
@@ -15,15 +15,15 @@ export const KEYWORDS = [
 export const META_INFO: Metadata = {
     metadataBase: new URL(BASE_URL),
     title: {
-        template: "%s | Tools by Forhad Khan",
+        template: "%s | All in one Tools",
         default: TITLE,
     },
     applicationName: TITLE,
     description: DESCRIPTION,
     keywords: KEYWORDS,
-    authors: [{ name: "FORHAD KHAN", url: "https://forhadakhan.com" }],
+    authors: [{ name: "Ravenom", url: "https://ferdinandestoque.com/" }],
     openGraph: {
-        title: "Tools by Forhad Khan - Your all-in-One tool-kit for everyday needs!",
+        title: "All in one Tools by Ravenom",
         siteName: TITLE,
         description: DESCRIPTION,
         url: BASE_URL,
@@ -45,7 +45,7 @@ export const META_INFO: Metadata = {
     },
     twitter: {
         card: "summary_large_image",
-        creator: "@forhadakhan",
+        creator: "@ravenom",
         title: TITLE,
         description: DESCRIPTION,
         images: `/banner-image.jpg`,
