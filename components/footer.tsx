@@ -19,7 +19,7 @@ export function Footer() {
             rel="noopener noreferrer"
             className="hover:underline underline-offset-4 transition-colors duration-300 font-medium"
           >
-            FORHAD KHAN
+            RAVENOM
           </a>
           . All rights reserved.
         </p>
