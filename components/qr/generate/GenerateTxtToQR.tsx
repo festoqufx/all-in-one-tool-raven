@@ -21,12 +21,12 @@ export const GenerateTxtToQR: React.FC = () => {
     <>
       <article className="grid w-full grid-cols-1 md:grid-cols-2">
         <section className='w-full md:min-h-80 '>
-          <label htmlFor="text-input" className='font-medium text-sm text-gray-600'>
+          <label htmlFor="text-input" className='field-label'>
             Text to generate QR code
           </label>
           <Textarea
             id="text-input"
-            className="w-full border border-gray-500 bg-white p-2 rounded h-full"
+            className="h-full min-h-64"
             value={text}
             onChange={(e) => setText(e.target.value)} // Update state with user input
             placeholder="Enter text here"

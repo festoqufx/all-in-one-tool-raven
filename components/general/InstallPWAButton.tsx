@@ -73,20 +73,20 @@ export default function InstallPWAButton() {
     return (
         <div>
             {isInstallable && (
-                <Button onClick={handleInstallClick} className='flex items-center justify-center gap-2 border-black/20 bg-white text-xs text-black hover:border-black hover:bg-black hover:text-white'>
+                <Button onClick={handleInstallClick} variant="outline" className='flex items-center justify-center gap-2 text-xs'>
                     <ArrowBigDownDashIcon className="w-4 h-4 mr-2" />
                     Install App
                 </Button>
             )}
             {isIOS && (
                 <Dialog>
-                    <DialogTrigger className='inline-flex items-center justify-center gap-2 rounded-full border border-black/20 bg-white px-4 py-2 text-xs font-medium text-black hover:border-black hover:bg-black hover:text-white'>
+                    <DialogTrigger className='inline-flex items-center justify-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-xs font-medium text-foreground hover:border-foreground hover:bg-foreground hover:text-background'>
                         <ArrowBigDownDashIcon className="w-4 h-4 mr-2" />
                         Install App
                     </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
-                            <DialogDescription className='py-4 text-center text-black/80'>
+                            <DialogDescription className='py-4 text-center'>
                                 To install this app, tap the share icon and select <span className='font-bold'>Add to Home Screen</span>.
                             </DialogDescription>
                         </DialogHeader>

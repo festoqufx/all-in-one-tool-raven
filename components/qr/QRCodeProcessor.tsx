@@ -1,55 +1,87 @@
 "use client";
 
-import { useState, useCallback } from 'react';
-import { BrowserQRCodeReader } from '@zxing/browser';
+import { useState, useCallback } from "react";
+import { BrowserQRCodeReader } from "@zxing/browser";
 import { IFormattedVCardData } from "@/lib/type-interface";
-import { VCardDisplay } from '@/components/qr/VCardDisplay';
+import { VCardDisplay } from "@/components/qr/VCardDisplay";
+import AutoLinkText from "@/components/general/AutoLinkText";
 import { isVCard, getVCardData, formatVCardData } from "@/lib/utils/qr";
 
 export const useQRCodeProcessor = () => {
-    const [qrData, setQrData] = useState<string | null>(null);
-    const [formattedData, setFormattedData] = useState<JSX.Element | string | null>(null);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'raw' | 'formatted'>('formatted');
+  const [qrData, setQrData] = useState<string | null>(null);
+  const [formattedData, setFormattedData] = useState<JSX.Element | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"raw" | "formatted">("formatted");
+  const [isProcessing, setIsProcessing] = useState(false);
 
-    const processFile = useCallback(async (file: File) => {
+  const applyDecodedText = useCallback((text: string) => {
+    setQrData(text);
+    setErrorMessage(null);
+
+    if (isVCard(text)) {
+      const vCardData = getVCardData(text);
+      const formatted = vCardData ? formatVCardData(vCardData) : null;
+      if (formatted) {
+        setFormattedData(<VCardDisplay data={formatted as IFormattedVCardData} />);
+        setActiveTab("formatted");
+        return;
+      }
+      setErrorMessage("Failed to parse vCard data.");
+    }
+
+    setFormattedData(<AutoLinkText text={text} />);
+    setActiveTab("formatted");
+  }, []);
+
+  const processFile = useCallback(
+    async (file: File) => {
+      setIsProcessing(true);
+      setErrorMessage(null);
+
+      try {
         const reader = new FileReader();
-        reader.onload = async () => {
-            const img = new Image();
-            img.src = reader.result as string;
-            img.onload = async () => {
-                const codeReader = new BrowserQRCodeReader();
-                try {
-                    const result = await codeReader.decodeFromImageElement(img);
-                    setQrData(result.getText());
-                    formatData(result.getText());
-                    setErrorMessage(null);
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                } catch (err) {
-                    setErrorMessage('Failed to read QR code from the image.');
-                }
-            };
-        };
-        reader.readAsDataURL(file);
-    }, []);
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = () => reject(new Error("Failed to read file"));
+          reader.readAsDataURL(file);
+        });
 
-    const formatData = (data: string) => {
-        if (isVCard(data)) {
-            const vCardData = getVCardData(data);
-            if (vCardData) {
-                const formattedVCardData = formatVCardData(vCardData);
-                if (!formattedVCardData) {
-                    setActiveTab('raw');
-                }
-                setFormattedData(<VCardDisplay data={formattedVCardData as IFormattedVCardData} />);
-            } else {
-                setActiveTab('raw');
-                setErrorMessage('Failed to parse vCard data.');
-            }
-        } else {
-            setActiveTab('raw');
-        }
-    };
+        const img = new Image();
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => resolve();
+          img.onerror = () => reject(new Error("Invalid image"));
+          img.src = dataUrl;
+        });
 
-    return { qrData, formattedData, errorMessage, activeTab, processFile, setQrData, setErrorMessage, setActiveTab };
+        const codeReader = new BrowserQRCodeReader();
+        const result = await codeReader.decodeFromImageElement(img);
+        applyDecodedText(result.getText());
+      } catch {
+        setErrorMessage("Failed to read QR code from the image.");
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    [applyDecodedText]
+  );
+
+  const clearResults = useCallback(() => {
+    setQrData(null);
+    setFormattedData(null);
+    setErrorMessage(null);
+    setActiveTab("formatted");
+  }, []);
+
+  return {
+    qrData,
+    formattedData,
+    errorMessage,
+    activeTab,
+    isProcessing,
+    processFile,
+    applyDecodedText,
+    clearResults,
+    setErrorMessage,
+    setActiveTab,
+  };
 };

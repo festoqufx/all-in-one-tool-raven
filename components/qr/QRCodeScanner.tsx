@@ -12,12 +12,11 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
     DialogFooter,
 } from "@/components/ui/dialog";
 
 interface QRCodeScannerProps {
-    setQrData: (data: string | null) => void;
+    setQrData: (data: string) => void;
     errorMessage?: string | null;
     setErrorMessage: (message: string | null) => void;
     buttonClassName?: string;
@@ -33,20 +32,26 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
 }) => {
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
 
-    const onNewScanResult = (text: any, decodedResult: any) => {
-        console.log("QR Code Scanner [text]: ", decodedResult);
-        console.log("QR Code Scanner [result]: ", decodedResult);
-        setQrData(decodedResult);
+    const onNewScanResult = (decodedText: string) => {
+        if (!decodedText) return;
+        setQrData(decodedText);
+        setErrorMessage(null);
+        setDialogOpen(false);
     };
 
     const handleOpenDialog = async () => {
+        if (!navigator.mediaDevices?.getUserMedia) {
+            setErrorMessage("Camera is not available in this browser.");
+            return;
+        }
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            stream.getTracks().forEach(track => track.stop()); // Stop the video stream as we only need permission
+            stream.getTracks().forEach((track) => track.stop());
+            setErrorMessage(null);
             setDialogOpen(true);
         } catch (error) {
-            setErrorMessage('Camera permission denied or not available.');
-            console.error('Camera permission error:', error);
+            setErrorMessage("Camera permission denied or not available.");
+            console.error("Camera permission error:", error);
         }
     };
 
@@ -56,18 +61,17 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
 
     return (
         <div>
+            <Button
+                type="button"
+                variant="outline"
+                className={cn("rounded-full bg-foreground text-background hover:bg-background hover:text-foreground", buttonClassName)}
+                onClick={() => void handleOpenDialog()}
+            >
+                <CameraIcon className="h-4 w-4" />
+                <span className="ml-2 hidden sm:inline">{children || "Scan QR Code"}</span>
+            </Button>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogTrigger asChild>
-                    <Button
-                        variant="outline"
-                        className={cn('rounded hover:bg-gray-100 bg-black text-white', buttonClassName)}
-                        onClick={handleOpenDialog}
-                    >
-                        <CameraIcon className="w-4 h-4" />
-                        <span className="hidden sm:inline ml-2">{children || 'Scan QR Code'}</span>
-                    </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px] bg-white">
+                <DialogContent className="bg-background sm:max-w-[425px]">
                     <DialogHeader>
                         <DialogTitle>Scan QR Code</DialogTitle>
                         <DialogDescription>
@@ -75,22 +79,26 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
                         </DialogDescription>
                     </DialogHeader>
 
-                    <Html5QrcodePlugin
-                        fps={10}
-                        qrbox={250}
-                        disableFlip={false}
-                        qrCodeSuccessCallback={onNewScanResult}
-                    />
+                    {dialogOpen && (
+                        <Html5QrcodePlugin
+                            fps={10}
+                            qrbox={250}
+                            disableFlip={false}
+                            qrCodeSuccessCallback={onNewScanResult}
+                        />
+                    )}
 
                     {errorMessage && (
-                        <p className="text-red-500 text-xs sm:text-sm flex items-center gap-2">
-                            <TriangleAlertIcon className="w-4 h-4" />
+                        <p className="flex items-center gap-2 text-xs text-destructive sm:text-sm">
+                            <TriangleAlertIcon className="h-4 w-4" />
                             {errorMessage}
                         </p>
                     )}
 
                     <DialogFooter>
-                        <Button type="button" size="sm" variant="destructive" className='border' onClick={handleCloseDialog}>Close</Button>
+                        <Button type="button" size="sm" variant="destructive" className="border" onClick={handleCloseDialog}>
+                            Close
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -133,61 +141,29 @@ const createConfig = (props: Html5QrcodePluginProps) => {
 };
 
 const Html5QrcodePlugin: React.FC<Html5QrcodePluginProps> = (props) => {
+    const successCallbackRef = React.useRef(props.qrCodeSuccessCallback);
+    const errorCallbackRef = React.useRef(props.qrCodeErrorCallback);
+
+    successCallbackRef.current = props.qrCodeSuccessCallback;
+    errorCallbackRef.current = props.qrCodeErrorCallback;
+
     useEffect(() => {
         const config = createConfig(props);
         const verbose = props.verbose === true;
-
-        if (!props.qrCodeSuccessCallback) {
-            throw new Error("qrCodeSuccessCallback is a required callback.");
-        }
-
         const html5QrcodeScanner = new Html5QrcodeScanner(qrcodeRegionId, config, verbose);
-        html5QrcodeScanner.render(props.qrCodeSuccessCallback, props.qrCodeErrorCallback);
-
-        // Apply styles after component mounts
-        const styleElement = document.createElement('style');
-        styleElement.textContent = `
-            .html5-qrcode-element {
-                border: 1px solid #cbcbcb;
-                background-color: #f5f5f5;
-                border-radius: 5px;
-                margin: 20px auto;
-                padding: 5px 10px;
-                text-decoration: none !important;
-            }
-            .html5-qrcode-element:hover {
-                background-color: #000000;
-                color: #f5f5f5;
-                text-decoration: underline !important;
-                text-underline-offset: 0.3rem;
-            }
-            #html5qr-code-full-region__scan_region {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
-                #html5qr-code-full-region > div:first-child {
-    display: none; /* Hides the first child div */
-}
-
-            #html5-qrcode-button-camera-start {
-                background-color: #FF5722;
-                color: white;
-                border: none;
-                padding: 10px;
-                border-radius: 5px;
-                cursor: pointer;
-            }
-        `;
-        document.head.appendChild(styleElement);
+        html5QrcodeScanner.render(
+            (decodedText, decodedResult) => successCallbackRef.current(decodedText, decodedResult),
+            (error) => errorCallbackRef.current?.(error)
+        );
 
         return () => {
-            html5QrcodeScanner.clear().catch(error => {
+            html5QrcodeScanner.clear().catch((error) => {
                 console.error("Failed to clear Html5QrcodeScanner. ", error);
             });
-            document.head.removeChild(styleElement);
         };
-    }, [props]);
+        // Initialize once when the scanner mounts.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
         <div id={qrcodeRegionId} />

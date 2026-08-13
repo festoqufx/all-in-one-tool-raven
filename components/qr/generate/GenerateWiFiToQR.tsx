@@ -22,6 +22,8 @@ export const GenerateWiFiToQR: React.FC = () => {
     isHidden: false
   });
 
+  const [showPassword, setShowPassword] = useState(false);
+
   const generateWiFiContent = (): string => {
     return `WIFI:T:${wifi.encryption};S:${wifi.ssid};P:${wifi.password};H:${wifi.isHidden ? 'true' : 'false'};`;
   }
@@ -30,18 +32,18 @@ export const GenerateWiFiToQR: React.FC = () => {
     <>
       <article className="grid w-full grid-cols-1 md:grid-cols-2">
         <section className='w-full md:min-h-80 '>
-          <p className='font-medium text-xs text-gray-600 flex gap-2 mb-2.5'>
+          <p className='mb-2.5 flex gap-2 text-xs font-medium text-muted-foreground'>
             <InfoCircledIcon />
             Fill all necessary information to generate WiFi QR Code
           </p>
 
           {/* SSID Input */}
           <div className="space-y-2">
-            <label htmlFor="wifi-ssid" className='font-medium text-sm text-gray-600'>Network Name (SSID)</label>
+            <label htmlFor="wifi-ssid" className='field-label'>Network Name (SSID)</label>
             <input
               type="text"
               id="wifi-ssid"
-              className="w-full border border-gray-500 p-2 rounded"
+              className="field-input"
               placeholder="WiFi Network Name"
               value={wifi.ssid}
               onChange={(e) => setWiFi({ ...wifi, ssid: e.target.value })}
@@ -50,22 +52,29 @@ export const GenerateWiFiToQR: React.FC = () => {
 
           {/* Password Input */}
           <div className="space-y-2">
-            <label htmlFor="wifi-password" className='font-medium text-sm text-gray-600'>Network Password</label>
+            <label htmlFor="wifi-password" className='field-label'>Network Password</label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               id="wifi-password"
-              className="w-full border border-gray-500 p-2 rounded"
+              className="field-input"
               placeholder="WiFi Password"
               value={wifi.password}
               onChange={(e) => setWiFi({ ...wifi, password: e.target.value })}
             />
+            <button
+              type="button"
+              className="text-xs text-muted-foreground underline-offset-4 hover:underline"
+              onClick={() => setShowPassword((current) => !current)}
+            >
+              {showPassword ? "Hide password" : "Show password"}
+            </button>
           </div>
 
           {/* Encryption Type Selector */}
           <div className="space-y-2">
-            <label htmlFor="wifi-encryption" className='font-medium text-sm text-gray-600'>Encryption Type</label>
+            <label htmlFor="wifi-encryption" className='field-label'>Encryption Type</label>
             <select
-              className="w-full border border-gray-500 p-2 rounded"
+              className="field-input"
               name="wifi-encryption"
               id="wifi-encryption"
               value={wifi.encryption}
@@ -89,7 +98,7 @@ export const GenerateWiFiToQR: React.FC = () => {
               checked={wifi.isHidden}
               onChange={(e) => setWiFi({ ...wifi, isHidden: e.target.checked })}
             />
-            <label htmlFor="wifi-hidden" className='font-medium text-sm text-gray-600'>Hidden Network</label>
+            <label htmlFor="wifi-hidden" className='text-sm font-medium text-muted-foreground'>Hidden Network</label>
           </div>
         </section>
         <section className='w-full min-h-80 flex flex-col items-center justify-center'>

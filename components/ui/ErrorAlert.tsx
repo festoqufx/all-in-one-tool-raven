@@ -17,7 +17,7 @@ interface ErrorAlertProps {
  * @returns {JSX.Element} - The error alert component.
  */
 const ErrorAlert: React.FC<ErrorAlertProps> = ({ message, className, iconClassName, titleClassName, descriptionClassName }) => (
-    <Alert variant="destructive" className={cn("mt-4 text-red-600", className)}>
+    <Alert variant="destructive" className={cn("mt-4", className)}>
         <TriangleAlertIcon className={cn("w-4 h-4", iconClassName)} />
         <AlertTitle className={cn("font-bold tracking-wide", titleClassName)}>Error</AlertTitle>
         <AlertDescription className={cn("flex items-center gap-4", descriptionClassName)}>

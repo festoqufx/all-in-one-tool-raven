@@ -49,26 +49,11 @@ const getVisitorInfo = async (): Promise<VisitorInfo> => {
     // Check if the Network Information API is supported for connection details
     const navigatorWithConnection = navigator as Navigator & { connection?: Connection };
     if (navigatorWithConnection.connection) {
-        visitorInfo.connectionType = navigatorWithConnection.connection.effectiveType;  // Connection type (e.g., "4g")
-        visitorInfo.downlink = navigatorWithConnection.connection.downlink;  // Estimated downlink speed
+        visitorInfo.connectionType = navigatorWithConnection.connection.effectiveType;
+        visitorInfo.downlink = navigatorWithConnection.connection.downlink;
     }
 
-    // Attempt to retrieve geolocation if supported and allowed
-    if ("geolocation" in navigator) {
-        return new Promise((resolve) => {
-            navigator.geolocation.getCurrentPosition((position) => {
-                // Set latitude and longitude if access is granted
-                visitorInfo.latitude = position.coords.latitude;
-                visitorInfo.longitude = position.coords.longitude;
-                resolve(visitorInfo);  // Resolve with geolocation data
-            }, () => {
-                resolve(visitorInfo);  // Resolve without geolocation data if access is denied or fails
-            });
-        });
-    } else {
-        // Return visitor info without geolocation data if not supported
-        return visitorInfo;
-    }
+    return visitorInfo;
 };
 
 interface GetVisitorInfoProps {
@@ -114,13 +99,13 @@ export const GetVisitorInfo: React.FC<GetVisitorInfoProps> = ({ className, showL
         <div className={cn("text-base md:text-md lg:text-lg xl:text-xl 2xl:text-2xl flex items-center justify-center gap-2", className)}>
             {visitorInfo ? (
                 // Render a table with visitor data if available
-                <table className="text-base md:text-md lg:text-lg xl:text-xl 2xl:text-2xl my-4">
+                <table className="data-table my-4">
                     <tbody>
                         {Object.entries(visitorInfo).map(([key, value]) => (
                             value && (
-                                <tr key={key} className="border border-gray-300">
-                                    <td className="px-4 py-2 font-semibold text-gray-600">{labelMap[key as keyof VisitorInfo]}</td>
-                                    <td className="px-4 py-2 bg-gray-100">{String(value)}</td>
+                                <tr key={key}>
+                                    <td>{labelMap[key as keyof VisitorInfo]}</td>
+                                    <td>{String(value)}</td>
                                 </tr>
                             )
                         ))}

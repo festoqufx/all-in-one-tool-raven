@@ -4,10 +4,12 @@ import type { Metadata } from "next";
 import { META_INFO } from "@/lib/meta";
 import { fontVariables } from "@/lib/fonts";
 import { Footer } from "@/components/footer";
+import { SiteHeader } from "@/components/SiteHeader";
 import { SchemaMarkup } from "@/lib/schema-markup";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { ThemeScript } from "@/components/theme/ThemeScript";
 
 export const metadata: Metadata = META_INFO;
-
 
 export default function RootLayout({
   children,
@@ -17,6 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <ThemeScript />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(SchemaMarkup) }}
@@ -24,14 +27,23 @@ export default function RootLayout({
       </head>
       <body
         className={cn(
-          "min-h-screen flex flex-col antialiased px-3 md:px-6",
-          ...Object.values(fontVariables) // Spread the values of fontVariables
+          "flex min-h-screen flex-col antialiased px-3 md:px-6",
+          ...Object.values(fontVariables)
         )}
-        style={{ minHeight: "100vh" }}
       >
-        <div className="mx-auto flex w-full max-w-7xl flex-grow flex-col">{children}</div>
-
-        <Footer />
+        <ThemeProvider>
+          <a href="#main-content" className="skip-link">
+            Skip to content
+          </a>
+          <SiteHeader />
+          <div
+            id="main-content"
+            className="mx-auto flex w-full max-w-7xl flex-grow flex-col"
+          >
+            {children}
+          </div>
+          <Footer />
+        </ThemeProvider>
       </body>
     </html>
   );

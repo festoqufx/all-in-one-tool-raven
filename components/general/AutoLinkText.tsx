@@ -39,7 +39,7 @@ const AutoLinkText: React.FC<AutoLinkTextProps> = ({ text }) => {
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="font-medium text-black underline decoration-black/30 underline-offset-4 hover:decoration-black"
+        className="font-medium text-foreground underline decoration-foreground/30 underline-offset-4 hover:decoration-foreground"
       >
         {url}
       </a>

@@ -2,164 +2,11 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import styled from 'styled-components';
 import ReactShowdown from 'react-showdown';
 import { Button } from '@/components/ui/button';
 import { MarkdownIcon } from '@/components/markdown/MarkdownIcon';
 import { CopyToClipboardButton } from '@/components/ui/CopyToClipboardButton';
 import { ExpandIcon, ShrinkIcon, PrinterIcon, DownloadIcon } from 'lucide-react';
-
-// Define the styled component with all your styles
-const PreviewContent = styled.main`
-    #preview-content blockquote {
-        margin: 20px 15px !important;
-        padding: 0.4em;
-        color: #666c74;
-        border-left: 0.25em solid #dfe2e5;
-        background-color: #f3f3f3;
-    }
-
-    #preview-content p {
-        margin: 10px 0 !important;
-        line-height: 1.6 !important;
-    }
-
-    #preview-content a {
-        color: blue;
-        text-decoration: none;
-        transition: color 0.3s ease-in-out !important;
-    }
-
-    #preview-content a:hover {
-        text-decoration: underline;
-    }
-
-    #preview-content code {
-        background-color: #eeecec;
-        border-radius: 8px;
-        padding: 5px;
-        margin: 10px 0;
-        font-family: "Courier New", Courier, monospace;
-        font-size: 14px;
-        line-height: 1.5;
-        color: #333;
-    }
-
-    #preview-content pre {
-        display: block;
-        background-color: #eeecec !important;
-        padding: 15px !important;
-        margin: 15px 0 !important;
-        border-radius: 15px;
-    }
-
-    #preview-content h1,
-    #preview-content h2,
-    #preview-content h3,
-    #preview-content h4,
-    #preview-content h5,
-    #preview-content h6 {
-        font-weight: bold !important;
-        margin-top: 20px !important;
-        margin-bottom: 10px !important;
-    }
-
-    #preview-content h1 {
-        font-size: 32px !important;
-        border-bottom: 1px solid #eaecef !important;
-        padding-bottom: 10px !important;
-    }
-
-    #preview-content h2 {
-        font-size: 24px !important;
-        border-bottom: 1px solid #eaecef !important;
-        padding-bottom: 6px !important;
-    }
-
-    #preview-content h3 {
-        font-size: 20px !important;
-    }
-
-    #preview-content h4 {
-        font-size: 16px !important;
-    }
-
-    #preview-content h5 {
-        font-size: 14px !important;
-    }
-
-    #preview-content h6 {
-        font-size: 12px !important;
-    }
-
-    #preview-content table {
-        width: 100% !important;
-        border-collapse: collapse !important;
-        margin-bottom: 16px !important;
-    }
-
-    #preview-content th,
-    #preview-content td {
-        padding: 6px 13px !important;
-        border: 1px solid #dfe2e5 !important;
-    }
-
-    #preview-content th {
-        background-color: #f6f8fa !important;
-        font-weight: bold !important;
-    }
-
-    #preview-content td {
-        background-color: #fff !important;
-    }
-
-    #preview-content img {
-        width: auto;
-        max-width: 100%;
-        margin: 1.5rem auto;
-        height: auto;
-        border: 0;
-        vertical-align: middle;
-    }
-
-    #preview-content strong {
-        font-weight: 600;
-    }
-
-    #preview-content em,
-    #preview-content i {
-        font-style: italic;
-    }
-
-    #preview-content del {
-        text-decoration: line-through;
-        color: #cb2431;
-    }
-
-    #preview-content ul {
-        list-style-type: disc !important;
-        margin: 10px !important;
-        list-style-position: outside !important;
-    }
-
-    #preview-content ul ul {
-        list-style-type: circle !important;
-    }
-
-    #preview-content ul ul ul {
-        list-style-type: square !important;
-    }
-
-    #preview-content ol {
-        list-style-type: decimal !important;
-        margin: 15px !important;
-    }
-
-    #preview-content .border-bottom-none {
-        border-bottom: none !important;
-    }
-`;
-
 
 interface MarkdownPreviewProps {
     markdown: string;
@@ -169,8 +16,6 @@ interface MarkdownPreviewProps {
 }
 
 export default function MarkdownPreview({ markdown, isFullScreen, handleToggleFullScreen, modeToggle }: MarkdownPreviewProps) {
-
-
     const handlePrint = () => {
         const printContent = document.getElementById("preview-content")?.innerHTML;
         const printWindow = window.open('', '_blank');
@@ -180,111 +25,19 @@ export default function MarkdownPreview({ markdown, isFullScreen, handleToggleFu
                 <html>
                     <head>
                         <title>Print Preview</title>
-                        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400&display=swap" rel="stylesheet">
                         <style>
-                            body {
-                                font-family: "Noto Sans", sans-serif;
-                                margin: 20px;
-                            }
-                            blockquote {
-                                margin: 20px 15px !important;
-                                padding: 0.4em;
-                                color: #666c74;
-                                border-left: 0.25em solid #dfe2e5;
-                                background-color: #f3f3f3;
-                            }
-                            p {
-                                margin: 10px 0 !important;
-                                line-height: 1.6 !important;
-                            }
-                            a {
-                                color: blue;
-                                text-decoration: none;
-                                transition: color 0.3s ease-in-out !important;
-                            }
-                            a:hover {
-                                text-decoration: underline;
-                            }
-                            code {
-                                background-color: #eeecec;
-                                border-radius: 8px;
-                                padding: 5px;
-                                margin: 10px 0;
-                                font-family: "Courier New", Courier, monospace;
-                                font-size: 14px;
-                                line-height: 1.5;
-                                color: #333;
-                            }
-                            pre {
-                                display: block;
-                                background-color: #eeecec !important;
-                                padding: 15px !important;
-                                margin: 15px 0 !important;
-                                border-radius: 15px;
-                            }
-                            h1, h2, h3, h4, h5, h6 {
-                                font-weight: bold !important;
-                                margin-top: 20px !important;
-                                margin-bottom: 10px !important;
-                            }
-                            h1 {
-                                font-size: 32px !important;
-                                border-bottom: 1px solid #eaecef !important;
-                                padding-bottom: 10px !important;
-                            }
-                            h2 {
-                                font-size: 24px !important;
-                                border-bottom: 1px solid #eaecef !important;
-                                padding-bottom: 6px !important;
-                            }
-                            h3 { font-size: 20px !important; }
-                            h4 { font-size: 16px !important; }
-                            h5 { font-size: 14px !important; }
-                            h6 { font-size: 12px !important; }
-                            table {
-                                width: 100% !important;
-                                border-collapse: collapse !important;
-                                margin-bottom: 16px !important;
-                            }
-                            th, td {
-                                padding: 6px 13px !important;
-                                border: 1px solid #dfe2e5 !important;
-                            }
-                            th {
-                                background-color: #f6f8fa !important;
-                                font-weight: bold !important;
-                            }
-                            td {
-                                background-color: #fff !important;
-                            }
-                            img {
-                                width: auto;
-                                max-width: 100%;
-                                margin: 1.5rem auto;
-                                height: auto;
-                                border: 0;
-                                vertical-align: middle;
-                            }
-                            strong { font-weight: 600; }
-                            em, i { font-style: italic; }
-                            del {
-                                text-decoration: line-through;
-                                color: #cb2431;
-                            }
-                            ul {
-                                list-style-type: disc !important;
-                                margin: 10px !important;
-                                list-style-position: outside !important;
-                            }
-                            ul ul { list-style-type: circle !important; }
-                            ul ul ul { list-style-type: square !important; }
-                            ol {
-                                list-style-type: decimal !important;
-                                margin: 15px !important;
-                            }
-                            .border-bottom-none {
-                                border-bottom: none !important;
-                            }
+                            body { font-family: system-ui, sans-serif; margin: 20px; color: #111; }
+                            blockquote { margin: 20px 15px; padding: 0.4em; color: #555; border-left: 0.25em solid #ccc; background: #f4f4f4; }
+                            p { margin: 10px 0; line-height: 1.6; }
+                            a { color: #111; text-decoration: underline; }
+                            code, pre { background: #f2f2f2; border-radius: 8px; font-family: ui-monospace, monospace; }
+                            pre { display: block; padding: 15px; margin: 15px 0; }
+                            h1, h2 { border-bottom: 1px solid #ddd; padding-bottom: 8px; }
+                            table { width: 100%; border-collapse: collapse; }
+                            th, td { padding: 6px 13px; border: 1px solid #ddd; }
+                            img { max-width: 100%; }
+                            ul { list-style: disc; margin-left: 1.25rem; }
+                            ol { list-style: decimal; margin-left: 1.25rem; }
                         </style>
                     </head>
                     <body>
@@ -300,66 +53,59 @@ export default function MarkdownPreview({ markdown, isFullScreen, handleToggleFu
     const handleSaveAsMarkdown = () => {
         const blob = new Blob([markdown], { type: 'text/markdown' });
         const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
+        const url = URL.createObjectURL(blob);
+        link.href = url;
         link.download = 'document.md';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     };
 
     return (
         <article className={cn(
             "flex flex-col",
-            isFullScreen && "fixed p-8 top-0 left-0 bg-gray-50 right-0 bottom-0 z-50 scrollbar-hide"
+            isFullScreen && "fixed inset-0 z-50 bg-background p-8 scrollbar-hide"
         )}>
-            {/* Editor Header */}
-            <header className="flex items-center justify-between mb-2 bg-black rounded p-2" id='editor-header'>
-                <h2 className="text-xl font-semibold mb-2 flex items-center text-white">
-                    <MarkdownIcon className="w-12 h-8 bg-black fill-white rounded-md mr-2 px-2" />
+            <header className="mb-2 flex items-center justify-between rounded-xl bg-foreground p-2" id='editor-header'>
+                <h2 className="mb-0 flex items-center text-lg font-semibold text-background md:text-xl">
+                    <MarkdownIcon className="mr-2 h-8 w-12 fill-background px-2" />
                     Preview
                 </h2>
                 <section className='flex space-x-2'>
-
-                    {/* Save as Markdown Button */}
                     <CopyToClipboardButton
                         data={markdown}
                         copyIconClassName='w-4 h-4'
-                        className='bg-black text-white hover:bg-gray-50 hover:text-black p-2 rounded'
+                        className='rounded-md bg-foreground p-2 text-background hover:bg-background hover:text-foreground'
                     />
-
-                    {/* Save as Markdown Button */}
                     <Button
-                        className='bg-black hover:bg-gray-50 hover:text-black'
+                        className='bg-foreground text-background hover:bg-background hover:text-foreground'
                         size={'icon'}
                         title='Save as Markdown'
                         onClick={handleSaveAsMarkdown}
                     >
-                        <DownloadIcon className="w-4 h-4" />
+                        <DownloadIcon className="h-4 w-4" />
                     </Button>
-
-                    {/* Print Button */}
                     <Button
                         size={'icon'}
                         title='Print Preview'
                         onClick={handlePrint}
-                        className='bg-black hover:bg-gray-50 hover:text-black'
+                        className='bg-foreground text-background hover:bg-background hover:text-foreground'
                     >
-                        <PrinterIcon className="w-4 h-4" />
+                        <PrinterIcon className="h-4 w-4" />
                     </Button>
-
-                    {/* FullScreen Control Button */}
                     <Button
                         size={'icon'}
                         title='Toggle FullScreen'
                         onClick={handleToggleFullScreen}
-                        className='bg-black hover:bg-gray-50 hover:text-black'
+                        className='bg-foreground text-background hover:bg-background hover:text-foreground'
                     >
-                        {isFullScreen ? <ShrinkIcon className="w-4 h-4" /> : <ExpandIcon className="w-4 h-4" />}
+                        {isFullScreen ? <ShrinkIcon className="h-4 w-4" /> : <ExpandIcon className="h-4 w-4" />}
                     </Button>
                 </section>
             </header>
 
-            <PreviewContent className="h-[calc(100vh-200px)] border rounded border-black overflow-auto w-full bg-white p-6 scrollbar-hide">
+            <div className="markdown-preview scrollbar-hide h-[calc(100vh-240px)] w-full overflow-auto rounded-xl border border-border bg-card p-6">
                 {markdown ? (
                     <ReactShowdown
                         id="preview-content"
@@ -368,16 +114,15 @@ export default function MarkdownPreview({ markdown, isFullScreen, handleToggleFu
                         options={{ emoji: true }}
                     />
                 ) : (
-                    <div className="flex items-center justify-center h-full">
-                        <MarkdownIcon className="w-24 h-24 fill-gray-300" aria-label="No content available" />
+                    <div className="flex h-full items-center justify-center">
+                        <MarkdownIcon className="h-24 w-24 fill-muted-foreground/30" aria-label="No content available" />
                     </div>
                 )}
-            </PreviewContent>
+            </div>
 
-            {/* Only display when full screen */}
             {isFullScreen && (
                 <footer>
-                    <Button type='button' size={'sm'} onClick={modeToggle} className='max-w-lg my-4 mx-auto w-36'>
+                    <Button type='button' size={'sm'} onClick={modeToggle} className='mx-auto my-4 w-36 max-w-lg'>
                         Edit
                     </Button>
                 </footer>
@@ -385,4 +130,3 @@ export default function MarkdownPreview({ markdown, isFullScreen, handleToggleFu
         </article>
     );
 }
-

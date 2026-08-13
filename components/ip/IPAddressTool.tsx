@@ -11,82 +11,93 @@ import { CopyToClipboardButton } from "@/components/ui/CopyToClipboardButton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 interface IPInfo {
-    ip: string; // IP address
-    city?: string; // City based on IP geolocation
-    region?: string; // Region or state based on IP geolocation
-    country?: string; // Country code (ISO 3166-1 alpha-2) based on IP geolocation
-    timezone?: string; // Timezone based on IP geolocation
-    org?: string; // ISP or organization name associated with the IP
+    ip: string;
+    city?: string;
+    region?: string;
+    country?: string;
+    timezone?: string;
+    org?: string;
 }
 
-// Fetch IP address using api64.ipify.org
 const fetchIpOnly = async (): Promise<string | null> => {
     try {
-        const res = await fetch("https://api64.ipify.org?format=json");
+        const res = await fetch("/api/ip", { cache: "no-store" });
+        if (!res.ok) throw new Error("IP lookup failed");
         const data = await res.json();
-        return data.ip;
+        return data.ip ?? null;
     } catch (error) {
         console.error("Failed to fetch IP:", error);
         return null;
     }
 };
 
-// Fetch detailed IP information using ipinfo.io
 const fetchIpDetails = async (ip: string): Promise<IPInfo | null> => {
-    const token = process.env.NEXT_PUBLIC_IPINFO_API_TOKEN;
     try {
-        const res = await fetch(`https://ipinfo.io/${ip}/json?token=${token}`);
-        const data = await res.json();
-        return { ...data, ip };
+        const res = await fetch(`/api/ip/lookup?ip=${encodeURIComponent(ip)}`, { cache: "no-store" });
+        if (!res.ok) throw new Error("IP details lookup failed");
+        return { ip };
     } catch (error) {
         console.error("Failed to fetch IP details:", error);
         return null;
     }
 };
 
-// Fetch IP address of a domain using a DNS lookup API
 const fetchDomainIP = async (domain: string): Promise<string | null> => {
     try {
-        const res = await fetch(`https://dns.google/resolve?name=${domain}`);
+        const res = await fetch(`/api/dns?name=${encodeURIComponent(domain)}`, { cache: "no-store" });
+        if (!res.ok) return null;
         const data = await res.json();
-        const ip = data?.Answer?.[0]?.data; // Extract the IP address from the response
-        return ip || null;
+        return data.ip || null;
     } catch (error) {
         console.error("Failed to fetch domain IP:", error);
         return null;
     }
 };
 
-// Component 1: Show Visitor's IP Details Automatically
 const VisitorIPDetails: React.FC = () => {
     const [ipInfo, setIpInfo] = useState<IPInfo | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+
+    const load = async () => {
+        setLoading(true);
+        setError(false);
+        const ip = await fetchIpOnly();
+        if (ip) {
+            const details = await fetchIpDetails(ip);
+            if (details) {
+                setIpInfo(details);
+                setLoading(false);
+                return;
+            }
+        }
+        setIpInfo(null);
+        setError(true);
+        setLoading(false);
+    };
 
     useEffect(() => {
-        async function initializeIpInfo() {
-            setLoading(true);
-            const ip = await fetchIpOnly();
-            if (ip) {
-                const details = await fetchIpDetails(ip);
-                if (details) setIpInfo(details);
-            }
-            setLoading(false);
-        }
-
-        initializeIpInfo();
+        void load();
     }, []);
 
     if (loading) {
         return <LoadingDots size={6} />;
     }
 
-    if (!ipInfo) {
-        return <p className="text-red-600">Failed to load IP information. Please try again later.</p>;
+    if (error || !ipInfo) {
+        return (
+            <div className="flex flex-col items-center gap-3">
+                <p className="text-destructive">Failed to load IP information.</p>
+                <Button type="button" variant="outline" size="sm" onClick={() => void load()}>
+                    Retry
+                </Button>
+            </div>
+        );
     }
 
     return (
         <article className="flex flex-col items-center justify-center gap-4">
-            <section className="flex gap-2 font-extrabold text-2xl">
+            <section className="flex gap-2 text-2xl font-extrabold">
                 {ipInfo.ip}
                 <CopyToClipboardButton data={ipInfo.ip} />
             </section>
@@ -95,77 +106,76 @@ const VisitorIPDetails: React.FC = () => {
     );
 };
 
-// Component 2: Allow User to Input and Find IP Details
 const FindAnyIPDetails: React.FC = () => {
     const [inputIP, setInputIP] = useState<string>("");
     const [ipInfo, setIpInfo] = useState<IPInfo | null>(null);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const handleIpSearch = async () => {
         if (inputIP.trim() === "") return;
         setLoading(true);
+        setError(null);
         const details = await fetchIpDetails(inputIP.trim());
-        if (details) setIpInfo(details);
+        if (details) {
+            setIpInfo(details);
+        } else {
+            setError("Could not find details for that IP address.");
+        }
         setLoading(false);
     };
 
     return (
         <article className="flex flex-col items-center justify-center gap-4">
-            <div className="flex gap-2 items-center my-4">
+            <form
+                className="my-4 flex w-full items-center gap-2"
+                onSubmit={(event) => {
+                    event.preventDefault();
+                    void handleIpSearch();
+                }}
+            >
                 <Input
                     type="text"
                     value={inputIP}
                     onChange={(e) => setInputIP(e.target.value)}
                     placeholder="Enter an IP address"
-                    className="border border-black"
+                    aria-label="IP address"
                 />
-                <Button
-                    onClick={handleIpSearch}
-                    disabled={loading}
-                >
-                    {loading ? <LoaderIcon className="animate-spin h-4 w-4 mr-2" /> : <SearchIcon className="h-4 w-4 mr-2" />}
+                <Button type="submit" disabled={loading}>
+                    {loading ? <LoaderIcon className="mr-2 h-4 w-4 animate-spin" /> : <SearchIcon className="mr-2 h-4 w-4" />}
                     Search
                 </Button>
-            </div>
+            </form>
             {loading && <LoadingDots size={6} />}
+            {error && <p className="text-sm text-destructive">{error}</p>}
             {ipInfo && <IPDetailsTable ipInfo={ipInfo} />}
         </article>
     );
 };
 
-// Component 3: Find Website or Domain IP Address with Normalized Inputs
 const FindWebsiteIPDetails: React.FC = () => {
-    const [domain, setDomain] = useState<string>(""); // Input domain
-    const [normalizedDomain, setNormalizedDomain] = useState<string | null>(null); // Normalized domain
-    const [domainIP, setDomainIP] = useState<string | null>(null); // Resolved IP address
-    const [ipInfo, setIpInfo] = useState<IPInfo | null>(null); // IP details
-    const [loading, setLoading] = useState(false); // Loading state for domain resolution
-    const [detailsLoading, setDetailsLoading] = useState(false); // Loading state for IP details
-    const [domainError, setDomainError] = useState<string | null>(null); // Error message for domain resolution
+    const [domain, setDomain] = useState<string>("");
+    const [normalizedDomain, setNormalizedDomain] = useState<string | null>(null);
+    const [domainIP, setDomainIP] = useState<string | null>(null);
+    const [ipInfo, setIpInfo] = useState<IPInfo | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [detailsLoading, setDetailsLoading] = useState(false);
+    const [domainError, setDomainError] = useState<string | null>(null);
 
-    /**
-     * Normalize the input to extract the main domain.
-     * @param input User's input (e.g., URL or domain name)
-     * @returns Normalized domain name or null if invalid
-     */
     const normalizeInput = (input: string): string | null => {
         try {
-            // If the input includes a protocol, use the URL API to parse it
             if (input.startsWith("http://") || input.startsWith("https://")) {
                 const url = new URL(input);
-                return url.hostname; // Extract the hostname (e.g., sub.example.com → example.com)
+                return url.hostname;
             }
 
-            // Handle inputs without protocol, e.g., "sub.example.com"
-            const domainParts = input.split(".");
+            const hostname = input.split("/")[0];
+            const domainParts = hostname.split(".").filter(Boolean);
             if (domainParts.length < 2) {
                 throw new Error("Invalid domain format");
             }
 
-            // Extract the main domain (e.g., sub.example.com → example.com)
-            const tld = domainParts[domainParts.length - 1]; // Top-level domain
-            const secondLevel = domainParts[domainParts.length - 2]; // Second-level domain
-            return `${secondLevel}.${tld}`;
+            return hostname;
         } catch (error) {
             console.error("Failed to normalize input:", error);
             return null;
@@ -176,12 +186,11 @@ const FindWebsiteIPDetails: React.FC = () => {
         if (domain.trim() === "") return;
 
         setLoading(true);
-        setDomainError(null); // Clear previous errors
-        setDomainIP(null); // Reset previous IP
-        setIpInfo(null); // Reset IP info
-        setNormalizedDomain(null); // Reset normalized domain
+        setDomainError(null);
+        setDomainIP(null);
+        setIpInfo(null);
+        setNormalizedDomain(null);
 
-        // Normalize the input
         const normalized = normalizeInput(domain.trim());
         if (!normalized) {
             setDomainError("Invalid domain. Please enter a valid domain or URL.");
@@ -191,13 +200,12 @@ const FindWebsiteIPDetails: React.FC = () => {
         setNormalizedDomain(normalized);
 
         try {
-            const ip = await fetchDomainIP(normalized); // Fetch IP from the normalized domain
+            const ip = await fetchDomainIP(normalized);
             if (!ip) {
                 throw new Error("No IP address found for the domain.");
             }
             setDomainIP(ip);
 
-            // Fetch additional details about the resolved IP
             setDetailsLoading(true);
             const details = await fetchIpDetails(ip);
             setIpInfo(details || null);
@@ -212,111 +220,112 @@ const FindWebsiteIPDetails: React.FC = () => {
 
     return (
         <article className="flex flex-col items-center justify-center gap-4">
-            {/* Input for domain */}
-            <div className="flex gap-2 items-center my-4 w-full">
+            <form
+                className="my-4 flex w-full items-center gap-2"
+                onSubmit={(event) => {
+                    event.preventDefault();
+                    void handleDomainSearch();
+                }}
+            >
                 <Input
                     type="text"
                     value={domain}
                     onChange={(e) => setDomain(e.target.value)}
                     placeholder="Enter a domain name or URL"
-                    className="border border-black w-full"
+                    aria-label="Domain or URL"
+                    className="w-full"
                 />
-                <Button
-                    onClick={handleDomainSearch}
-                    disabled={loading}
-                >
-                    {loading ? <LoaderIcon className="animate-spin h-4 w-4 mr-2" /> : <SearchIcon className="h-4 w-4 mr-2" />}
+                <Button type="submit" disabled={loading}>
+                    {loading ? <LoaderIcon className="mr-2 h-4 w-4 animate-spin" /> : <SearchIcon className="mr-2 h-4 w-4" />}
                     Search
                 </Button>
-            </div>
+            </form>
 
-            {/* Loading state */}
             {loading && <LoadingDots size={6} />}
-
-            {/* Error message for domain resolution */}
-            {domainError && (
-                <p className="text-red-600">{domainError}</p>
-            )}
-
-            {/* Display normalized domain */}
-            {normalizedDomain && (
-                <p className="text-gray-600">
+            {domainError && <p className="text-destructive">{domainError}</p>}
+            {normalizedDomain && !domainIP && !domainError && (
+                <p className="text-muted-foreground">
                     Searching for IP of <span className="font-bold">{normalizedDomain}</span>...
                 </p>
             )}
-
-            {/* Display resolved IP */}
             {domainIP && (
                 <>
                     <p>
                         IP Address for{" "}
                         <a
-                            href={domain.startsWith("http") ? domain : `http://${domain}`}
+                            href={domain.startsWith("http") ? domain : `https://${normalizedDomain}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600"
+                            className="underline underline-offset-4"
                         >
                             {normalizedDomain}
                         </a>
                         :
                     </p>
-                    <section className="flex gap-2 font-extrabold text-2xl">
+                    <section className="flex gap-2 text-2xl font-extrabold">
                         {domainIP}
                         <CopyToClipboardButton data={domainIP} />
                     </section>
                 </>
             )}
-
-            {/* Show IP details */}
             {detailsLoading && <LoadingDots size={6} />}
             {domainIP && ipInfo && <IPDetailsTable ipInfo={ipInfo} />}
         </article>
     );
 };
 
-
-
-// Reusable Table Component to Display IP Details
 const IPDetailsTable: React.FC<{ ipInfo: IPInfo }> = ({ ipInfo }) => {
+    const rows = [
+        ["City", ipInfo.city],
+        ["Region", ipInfo.region],
+        ["Country", ipInfo.country],
+        ["Time Zone", ipInfo.timezone],
+        ["ISP", ipInfo.org],
+    ].filter(([, value]) => Boolean(value));
+
+    if (rows.length === 0) {
+        return <p className="text-sm text-muted-foreground">No additional location details were returned.</p>;
+    }
+
     return (
-        <table className="text-base md:text-md lg:text-lg xl:text-xl 2xl:text-2xl my-4 border border-gray-300">
+        <table className="data-table my-4 max-w-xl">
             <thead>
-                <tr className="border border-gray-300">
-                    <th colSpan={2} className="px-4 py-2">IP Details</th>
+                <tr>
+                    <th colSpan={2}>IP Details</th>
                 </tr>
             </thead>
             <tbody>
                 {ipInfo.city && (
-                    <tr className="border border-gray-300">
-                        <td className="px-4 py-2 font-semibold text-gray-600">City</td>
-                        <td className="px-4 py-2 bg-gray-100">{ipInfo.city}</td>
+                    <tr>
+                        <td>City</td>
+                        <td>{ipInfo.city}</td>
                     </tr>
                 )}
                 {ipInfo.region && (
-                    <tr className="border border-gray-300">
-                        <td className="px-4 py-2 font-semibold text-gray-600">Region</td>
-                        <td className="px-4 py-2 bg-gray-100">{ipInfo.region}</td>
+                    <tr>
+                        <td>Region</td>
+                        <td>{ipInfo.region}</td>
                     </tr>
                 )}
                 {ipInfo.country && (
-                    <tr className="border border-gray-300">
-                        <td className="px-4 py-2 font-semibold text-gray-600">Country</td>
-                        <td className="px-4 py-2 bg-gray-100 flex items-center gap-2">
+                    <tr>
+                        <td>Country</td>
+                        <td className="flex items-center gap-2">
                             {ipInfo.country}
                             <ReactCountryFlag countryCode={ipInfo.country} svg />
                         </td>
                     </tr>
                 )}
                 {ipInfo.timezone && (
-                    <tr className="border border-gray-300">
-                        <td className="px-4 py-2 font-semibold text-gray-600">Time Zone</td>
-                        <td className="px-4 py-2 bg-gray-100">{ipInfo.timezone}</td>
+                    <tr>
+                        <td>Time Zone</td>
+                        <td>{ipInfo.timezone}</td>
                     </tr>
                 )}
                 {ipInfo.org && (
-                    <tr className="border border-gray-300">
-                        <td className="px-4 py-2 font-semibold text-gray-600">ISP</td>
-                        <td className="px-4 py-2 bg-gray-100">{ipInfo.org}</td>
+                    <tr>
+                        <td>ISP</td>
+                        <td>{ipInfo.org}</td>
                     </tr>
                 )}
             </tbody>
@@ -324,21 +333,20 @@ const IPDetailsTable: React.FC<{ ipInfo: IPInfo }> = ({ ipInfo }) => {
     );
 };
 
-// Main Component with Tabs to Switch Between VisitorIP, FindIP, and FindWebsiteIP
 export const IPAddressTool: React.FC = () => {
     return (
-        <Tabs defaultValue="visitor" className="w-full max-w-2xl mx-auto">
-            <TabsList className="flex justify-center">
+        <Tabs defaultValue="visitor" className="mx-auto w-full max-w-2xl">
+            <TabsList className="grid h-auto w-full grid-cols-1 gap-1 rounded-2xl p-1 sm:grid-cols-3">
                 <TabsTrigger value="visitor">Your IP</TabsTrigger>
                 <TabsTrigger value="find">Find Any IP</TabsTrigger>
                 <TabsTrigger value="find-domain">Find Website IP</TabsTrigger>
             </TabsList>
-            <TabsContent value="visitor" className="text-center space-y-4">
-                <h3 className="scroll-m-20 text-lg md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl font-extrabold tracking-tight text-center text-gray-600 my-4">
+            <TabsContent value="visitor" className="space-y-4 text-center">
+                <h3 className="my-4 scroll-m-20 text-center text-lg font-extrabold tracking-tight text-muted-foreground md:text-2xl">
                     Your public IP address is
                 </h3>
                 <VisitorIPDetails />
-                <GetVisitorInfo />
+                <GetVisitorInfo showLoading />
             </TabsContent>
             <TabsContent value="find">
                 <FindAnyIPDetails />

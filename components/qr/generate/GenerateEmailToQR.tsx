@@ -46,31 +46,31 @@ const GenerateEmailToQR: React.FC<GenerateEmailToQRProps> = ({ id, className, ..
     <>
       <article className="grid w-full grid-cols-1 md:grid-cols-2">
         <section className='w-full md:min-h-80 '>
-          <p className='font-medium text-xs text-gray-600 flex gap-2 mb-2.5'>
+          <p className='mb-2.5 flex gap-2 text-xs font-medium text-muted-foreground'>
             <InfoCircledIcon />
             Fill all necessary information to generate Email QR code
           </p>
           <div className="space-y-2">
-            <label htmlFor="email-to" className='font-medium text-sm text-gray-600'>To Address</label>
+            <label htmlFor="email-to" className='field-label'>To Address</label>
             <input
               id="email-to"
               type="email"
-              className="w-full border border-gray-500 p-2 rounded"
+              className="field-input"
               value={email.to}
               onChange={(e) => setEmail({ ...email, to: e.target.value })}
               placeholder="recipient@example.com"
               required
             />
             {email.to && !isValidEmail(email.to) && (
-              <p className="text-red-500 text-xs lg:text-sm">Please enter a valid email address.</p>
+              <p className="text-xs text-destructive lg:text-sm">Please enter a valid email address.</p>
             )}
           </div>
           <div className="space-y-2">
-            <label htmlFor="email-subject" className='font-medium text-sm text-gray-600'>Subject</label>
+            <label htmlFor="email-subject" className='field-label'>Subject</label>
             <input
               id="email-subject"
               type="text"
-              className="w-full border border-gray-500 p-2 rounded"
+              className="field-input"
               value={email.subject}
               onChange={(e) => setEmail({ ...email, subject: e.target.value })}
               placeholder="Email Subject"
@@ -78,10 +78,10 @@ const GenerateEmailToQR: React.FC<GenerateEmailToQRProps> = ({ id, className, ..
             />
           </div>
           <div className="space-y-2">
-            <label htmlFor="email-body" className='font-medium text-sm text-gray-600'>Message</label>
+            <label htmlFor="email-body" className='field-label'>Message</label>
             <textarea
               id="email-body"
-              className="w-full border border-gray-500 p-2 rounded"
+              className="field-input"
               value={email.body}
               onChange={(e) => setEmail({ ...email, body: e.target.value })}
               placeholder="Email Body"
@@ -92,7 +92,7 @@ const GenerateEmailToQR: React.FC<GenerateEmailToQRProps> = ({ id, className, ..
         </section>
         <section className='w-full min-h-80 flex flex-col items-center justify-center'>
           {/* Generate QR Code */}
-          {email.to && isValidEmail(email.to) && email.subject && email.body ? (
+          {email.to && isValidEmail(email.to) ? (
             <QRCode
               value={generateEmailContent()}
               size={250}

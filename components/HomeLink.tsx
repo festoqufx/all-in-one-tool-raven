@@ -14,11 +14,19 @@ type Props = {
 
 export const HomeLink: React.FC<Props> = ({ className, textOnly, iconOnly, iconClassName, textClassName }) => {
     return (
-        <Link href={HOME_ROUTE} className={cn('group inline-flex items-center justify-center gap-2 rounded-full border border-black/20 bg-white px-4 py-2 text-black hover:border-black hover:bg-black hover:text-white', className)}>
+        <Link
+            href={HOME_ROUTE}
+            className={cn(
+                'group inline-flex items-center justify-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-foreground hover:border-foreground hover:bg-foreground hover:text-background',
+                className
+            )}
+        >
             {!textOnly && <LogoIcon className={iconClassName} />}
-            {!iconOnly && <h1 className={cn("text-xl font-semibold tracking-tight", textClassName)}>
-                All in one Tools
-            </h1>}
+            {!iconOnly && (
+                <span className={cn("text-xl font-semibold tracking-tight", textClassName)}>
+                    All in one Tools
+                </span>
+            )}
         </Link>
     )
 }

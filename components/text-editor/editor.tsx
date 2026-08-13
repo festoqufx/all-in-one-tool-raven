@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { FileInput } from '@/components/ui/FileInput';
 import React, { useState, useEffect, useCallback } from 'react';
-import { PlusIcon, MinusIcon, PrinterIcon, SaveIcon, FileIcon } from 'lucide-react';
+import { CopyToClipboardButton } from "@/components/ui/CopyToClipboardButton";
+import { triggerDownload } from "@/lib/utils";
+import { PlusIcon, MinusIcon, PrinterIcon, SaveIcon, FileIcon, Trash2Icon } from "lucide-react";
 
-/**
- * Props for EditorHeader.
- */
+const STORAGE_CONTENT = "text-editor-content";
+const STORAGE_NAME = "text-editor-filename";
+
 interface EditorHeaderProps {
     fileName: string;
     setFileName: React.Dispatch<React.SetStateAction<string>>;
@@ -17,28 +19,23 @@ interface EditorHeaderProps {
     handleZoom: (direction: 'in' | 'out') => void;
 }
 
-/**
- * EditorHeader displays the file name input and zoom controls.
- *
- * @param {EditorHeaderProps} props
- */
 const EditorHeader: React.FC<EditorHeaderProps> = ({ fileName, setFileName, zoomLevel, handleZoom }) => (
     <header className="flex items-center justify-between px-4 pb-3">
-        <section className="flex items-center">
-            <FileIcon className="h-4 w-4 mr-2" />
+        <section className="flex min-w-0 items-center">
+            <FileIcon className="mr-2 h-4 w-4 shrink-0" />
             <Input
                 type="text"
                 value={fileName}
                 onChange={(e) => setFileName(e.target.value)}
-                className='border-0 focus:ring-0 focus:border-slate-200 focus:shadow-none shadow-none underline underline-offset-4'
+                className='border-0 shadow-none underline underline-offset-4 focus:border-border focus:shadow-none focus:ring-0'
                 aria-label="File name"
             />
         </section>
-        <nav className="flex items-center space-x-2 ml-auto">
+        <nav className="ml-auto flex items-center space-x-2">
             <Button size="icon" variant="outline" onClick={() => handleZoom('out')} aria-label="Zoom out">
                 <MinusIcon className="h-4 w-4" />
             </Button>
-            <span className="hidden md:inline-block text-sm font-medium">{zoomLevel}%</span>
+            <span className="hidden text-sm font-medium md:inline-block">{zoomLevel}%</span>
             <Button size="icon" variant="outline" onClick={() => handleZoom('in')} aria-label="Zoom in">
                 <PlusIcon className="h-4 w-4" />
             </Button>
@@ -46,22 +43,15 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({ fileName, setFileName, zoom
     </header>
 );
 
-/**
- * Props for EditorFooter.
- */
 interface EditorFooterProps {
     characterCount: number;
     wordCount: number;
     lineCount: number;
+    autosaved: boolean;
 }
 
-/**
- * EditorFooter displays statistics about the content.
- *
- * @param {EditorFooterProps} props
- */
-const EditorFooter: React.FC<EditorFooterProps> = ({ characterCount, wordCount, lineCount }) => (
-    <footer className="text-sm text-muted-foreground px-4">
+const EditorFooter: React.FC<EditorFooterProps> = ({ characterCount, wordCount, lineCount, autosaved }) => (
+    <footer className="flex flex-wrap items-center justify-between gap-2 px-4 text-sm text-muted-foreground">
         {
             characterCount > 0
                 ? (
@@ -71,18 +61,33 @@ const EditorFooter: React.FC<EditorFooterProps> = ({ characterCount, wordCount, 
                 )
                 : 'No content.'
         }
+        <span className="text-xs uppercase tracking-[0.16em]">
+            {autosaved ? "Saved locally" : "Unsaved"}
+        </span>
     </footer>
 );
 
-/**
- * Main TextEditor component.
- *
- * @returns {JSX.Element} The rendered text editor component.
- */
 export const TextEditor: React.FC = () => {
     const [content, setContent] = useState<string>('');
     const [zoomLevel, setZoomLevel] = useState<number>(100);
     const [fileName, setFileName] = useState<string>('Document');
+    const [autosaved, setAutosaved] = useState(false);
+
+    useEffect(() => {
+        const savedContent = window.localStorage.getItem(STORAGE_CONTENT);
+        const savedName = window.localStorage.getItem(STORAGE_NAME);
+        if (savedContent) setContent(savedContent);
+        if (savedName) setFileName(savedName);
+    }, []);
+
+    useEffect(() => {
+        const timer = window.setTimeout(() => {
+            window.localStorage.setItem(STORAGE_CONTENT, content);
+            window.localStorage.setItem(STORAGE_NAME, fileName);
+            setAutosaved(true);
+        }, 400);
+        return () => window.clearTimeout(timer);
+    }, [content, fileName]);
 
     const handleFileChange = (file: File) => {
         const nameWithoutExtension = file.name.replace(/\.(txt|rtf)$/i, '');
@@ -90,9 +95,9 @@ export const TextEditor: React.FC = () => {
 
         const reader = new FileReader();
         reader.onload = (e) => {
-            let text = e.target?.result as string;
-            text = text.replace(/\r\n/g, '\n').replace(/\n/g, '<br>');
+            const text = ((e.target?.result as string) || "").replace(/\r\n/g, '\n');
             setContent(text);
+            setAutosaved(false);
         };
         reader.readAsText(file);
     };
@@ -104,16 +109,15 @@ export const TextEditor: React.FC = () => {
                 <html>
                   <head>
                     <title>${fileName || 'Document'}</title>
-                    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bangla:wght@400&display=swap" rel="stylesheet">
                     <style>
                       body {
-                        font-family: 'Noto Sans Bengali', sans-serif;
+                        font-family: system-ui, sans-serif;
+                        white-space: pre-wrap;
+                        margin: 24px;
                       }
                     </style>
                   </head>
-                  <body>
-                    ${content}
-                  </body>
+                  <body>${content.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</body>
                 </html>
             `);
             printWindow.document.close();
@@ -131,34 +135,36 @@ export const TextEditor: React.FC = () => {
 
     const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setContent(e.target.value);
+        setAutosaved(false);
     };
 
     const calculateStats = (text: string) => {
-        const characterCount = (text.match(/[^\s]/g) || []).length; // Count non-whitespace characters
-        const wordCount = (text.trim() === '' ? 0 : text.trim().split(/\s+/).length); // Count words
-        const lineCount = (text.trim() === '' ? 0 : text.split('\n').length); // Count lines
+        const characterCount = (text.match(/[^\s]/g) || []).length;
+        const wordCount = (text.trim() === '' ? 0 : text.trim().split(/\s+/).length);
+        const lineCount = (text.trim() === '' ? 0 : text.split('\n').length);
         return { characterCount, wordCount, lineCount };
     };
     const { characterCount, wordCount, lineCount } = calculateStats(content);
 
-    // Define handleSave using useCallback to avoid unnecessary re-renders
     const handleSave = useCallback((format: 'txt' | 'rtf') => {
         const mimeType = format === 'txt' ? 'text/plain;charset=utf-8' : 'application/rtf;charset=utf-8';
         const rtfContent = format === 'rtf' ? `{\\rtf1\\ansi\\ansicpg1252\\deff0\\nouicompat{\\fonttbl{\\f0\\fnil\\fcharset0 Calibri;}}\\viewkind4\\uc1 \\pard\\fs22\\lang9 ${content}\\par}` : content;
 
         const blob = new Blob([rtfContent], { type: mimeType });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `${fileName || 'document'}.${format}`;
-        link.click();
+        triggerDownload(blob, `${fileName || "document"}.${format}`);
     }, [content, fileName]);
 
-    // Use effect to handle keydown event
+    const handleClear = () => {
+        setContent('');
+        setAutosaved(false);
+        window.localStorage.removeItem(STORAGE_CONTENT);
+    };
+
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.ctrlKey && event.key === 's') {
-                event.preventDefault(); // Prevent the default save action
-                handleSave('txt'); // Save as TXT
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
+                event.preventDefault();
+                handleSave('txt');
             }
         };
 
@@ -169,27 +175,35 @@ export const TextEditor: React.FC = () => {
     }, [handleSave]);
 
     return (
-        <article className='container w-full mx-auto p-4'>
-
-            {/* Editor Menu Section */}
-            <header className="mb-4 flex space-x-2">
-                <FileInput size={'sm'} onFileSelect={handleFileChange} accept=".txt,.rtf" />
-                <Button size={'sm'} onClick={() => handleSave('txt')} variant="secondary" className='border hover:border-black'>
-                    <SaveIcon className="h-4 w-4 mr-2" />
+        <article className='container mx-auto w-full p-4'>
+            <header className="mb-4 flex flex-wrap gap-2">
+                <FileInput size={'sm'} type="button" onFileSelect={handleFileChange} accept=".txt,.rtf,.md" />
+                <Button type="button" size={'sm'} onClick={() => handleSave('txt')} variant="secondary">
+                    <SaveIcon className="mr-2 h-4 w-4" />
                     TXT
                 </Button>
-                <Button size={'sm'} onClick={() => handleSave('rtf')} variant="secondary" className='border hover:border-black'>
-                    <SaveIcon className="h-4 w-4 mr-2" />
+                <Button type="button" size={'sm'} onClick={() => handleSave('rtf')} variant="secondary">
+                    <SaveIcon className="mr-2 h-4 w-4" />
                     RTF
                 </Button>
-                <Button size={'sm'} onClick={handlePrint} variant="secondary" className='border hover:border-black'>
+                <CopyToClipboardButton
+                    data={content}
+                    buttonText="Copy"
+                    className="h-8 rounded-full border border-border px-3 text-xs hover:border-foreground"
+                    textClassName="text-xs"
+                    copyIconClassName="h-3.5 w-3.5"
+                />
+                <Button type="button" size={'sm'} onClick={handlePrint} variant="secondary">
                     <PrinterIcon className="h-4 w-4 md:mr-2" />
                     <span className='hidden md:inline'>Print</span>
                 </Button>
+                <Button type="button" size={'sm'} onClick={handleClear} variant="outline" disabled={!content}>
+                    <Trash2Icon className="mr-2 h-4 w-4" />
+                    Clear
+                </Button>
             </header>
 
-            {/* Editor Section */}
-            <section className="grid w-full gap-1.5 text-sans-bn border border-black rounded-lg py-4">
+            <section className="text-sans-bn grid w-full gap-1.5 rounded-2xl border border-border py-4">
                 <EditorHeader
                     fileName={fileName}
                     setFileName={setFileName}
@@ -202,10 +216,10 @@ export const TextEditor: React.FC = () => {
                         value={content}
                         onChange={handleContentChange}
                         placeholder="Start typing ..."
-                        className="h-[calc(100vh-200px)] py-4 mb-2 bg-white shadow-none border-y rounded-none border-x-0 focus:shadow-none focus:border-slate-200 focus-ring-0"
+                        className="mb-2 h-[calc(100vh-260px)] rounded-none border-x-0 border-y bg-background py-4 shadow-none focus:border-border focus:shadow-none"
                         style={{
                             fontSize: `${zoomLevel}%`,
-                            lineHeight: `${1.2 + (zoomLevel - 100) / 200}` // Controll line height with zooming. 
+                            lineHeight: `${1.2 + (zoomLevel - 100) / 200}`
                         }}
                         aria-label="Text editor"
                     />
@@ -214,6 +228,7 @@ export const TextEditor: React.FC = () => {
                     characterCount={characterCount}
                     wordCount={wordCount}
                     lineCount={lineCount}
+                    autosaved={autosaved}
                 />
             </section>
         </article>

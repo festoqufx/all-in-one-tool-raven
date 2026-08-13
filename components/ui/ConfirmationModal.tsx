@@ -103,7 +103,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                                 type="button"
                                 variant="secondary"
                                 onClick={onCancel}
-                                className="w-full border border-black"
+                                className="w-full border border-border"
                             >
                                 {cancelText || 'Cancel'}
                             </Button>

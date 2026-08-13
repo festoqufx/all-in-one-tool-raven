@@ -20,7 +20,7 @@ export default function MyIPHomePage() {
             <h2 className='sr-only'>{metadata.title as string}</h2>
             <h2 className='sr-only'>{metadata.description as string}</h2>
             
-            <h2 className='text-center text-lg md:text-xl xl:text-2xl font-black'>Get any IP address details</h2>
+            <h2 className='mb-2 text-center text-lg font-semibold md:text-xl'>Get any IP address details</h2>
 
             <section className='min-h-screen flex flex-col items-center gap-4 py-4'>
                 <IPAddressTool />

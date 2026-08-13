@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { useCallback } from "react";
 import { UploadIcon } from "lucide-react";
@@ -49,7 +51,7 @@ const SingleImageFileUpload: React.FC<FileUploadProps> = ({ processFile, classNa
                 className={cn("hidden", inputClassName)}
                 id="file-upload"
             />
-            <Button variant="outline" className={cn('rounded hover:bg-gray-100 bg-black text-white', buttonClassName)} asChild>
+            <Button variant="outline" className={cn('rounded-full', buttonClassName)} asChild>
                 <label htmlFor="file-upload" className="cursor-pointer">
                     <UploadIcon className="w-4 h-4" />
                     <span className="hidden sm:inline ml-2">{children || 'Upload'}</span>

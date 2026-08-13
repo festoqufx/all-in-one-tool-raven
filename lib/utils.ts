@@ -29,12 +29,15 @@ export function calculatePercentageDifference(
   const prevNum = typeof previous === 'string' ? parseFloat(previous) : previous;
   const newNum = typeof newValue === 'string' ? parseFloat(newValue) : newValue;
 
+  if (prevNum <= 0) {
+    return 0;
+  }
+
   if (prevNum <= newNum) {
     if (soften) {
-      console.warn("The previous value should be greater than the new value.");
-    } else {
-      throw new Error("The previous value should be greater than the new value.");
+      return 0;
     }
+    throw new Error("The previous value should be greater than the new value.");
   }
 
   const difference = prevNum - newNum;
@@ -83,3 +86,19 @@ export function convertToBytes(formattedSize: string): number {
 
   return parseFloat(value) * Math.pow(1024, index);
 };
+
+export function triggerDownloadFromUrl(href: string, fileName: string) {
+  const link = document.createElement("a");
+  link.href = href;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+export function triggerDownload(blob: Blob, fileName: string) {
+  const url = URL.createObjectURL(blob);
+  triggerDownloadFromUrl(url, fileName);
+  window.setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+

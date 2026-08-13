@@ -39,13 +39,13 @@ const VCardDisplay: React.FC<VCardDisplayProps> = ({ data }) => {
             <h2 className="text-2xl font-bold mb-4">vCard Content</h2>
             <div className="space-y-4">
                 {fields.map((item, index) => (
-                    <Alert key={index} variant="default" className="mb-2 p-4 bg-white shadow rounded">
+                    <Alert key={index} variant="default" className="mb-2 rounded-xl p-4 shadow-sm">
                         <AlertTitle className="font-semibold">{item.label}:</AlertTitle>
-                        <AlertDescription className="flex items-center gap-1 mt-1">
+                        <AlertDescription className="mt-1 flex items-center gap-1">
                             {item.link ? (
                                 <a
                                     href={getHref(item)}
-                                    className="text-blue-600 hover:underline"
+                                    className="underline underline-offset-4"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     aria-label={item.label}
@@ -65,7 +65,7 @@ const VCardDisplay: React.FC<VCardDisplayProps> = ({ data }) => {
                     <Accordion type="single" className='text-sm' collapsible>
                         <AccordionItem value="item-1">
                             <AccordionTrigger>View errors</AccordionTrigger>
-                            <AccordionContent className="text-red-600 border border-red-500 p-2 rounded mt-4">
+                            <AccordionContent className="mt-4 rounded border border-destructive p-2 text-destructive">
                                 {errors.map((error, index) => (
                                     <p key={index} className="text-sm">
                                         Error: {error.description} ({error.attributes.property} - {error.attributes.line})

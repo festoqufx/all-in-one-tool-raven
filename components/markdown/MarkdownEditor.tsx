@@ -24,7 +24,9 @@ export default function MarkdownEditor({ markdown, isFullScreen, handleToggleFul
     if (savedMarkdown) {
       update(savedMarkdown);
     }
-  }, [update]);
+    // Load saved draft once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newMarkdown = e.target.value;
@@ -56,86 +58,79 @@ export default function MarkdownEditor({ markdown, isFullScreen, handleToggleFul
   return (
     <article className={cn(
       "flex flex-col",
-      isFullScreen && "fixed p-8 top-0 left-0 bg-gray-50 right-0 bottom-0 z-40 scrollbar-hide"
+      isFullScreen && "fixed inset-0 z-40 bg-background p-8 scrollbar-hide"
     )}>
-      {/* Editor Header */}
-      <header className="flex items-center justify-between mb-2 bg-black text-white rounded p-2" id='editor-header'>
-        <h2 className="text-xl font-semibold mb-2 flex items-center">
-          <PencilRulerIcon className="w-10 h-8 bg-black mr-2 px-2" />
+      <header className="mb-2 flex items-center justify-between rounded-xl bg-foreground p-2 text-background" id='editor-header'>
+        <h2 className="mb-0 flex items-center text-lg font-semibold md:text-xl">
+          <PencilRulerIcon className="mr-2 h-8 w-10 px-2" />
           Editor
         </h2>
         <section className='flex space-x-2'>
-          {/* Load Sample Button or Confirmation Modal */}
           {value === '' ? (
             <Button
-              className='bg-black hover:underline underline-offset-4 font-normal text-xs md:text-sm'
+              className='bg-foreground text-background hover:bg-background hover:text-foreground'
               size='icon'
               title='Load Sample'
               onClick={handleLoadSample}
             >
-              <FileQuestionIcon className="w-4 h-4" />
+              <FileQuestionIcon className="h-4 w-4" />
             </Button>
           ) : (
             <ConfirmationModal
               title="Load Sample?"
               message="This will replace your current content. Are you sure?"
               onConfirm={handleLoadSample}
-              className='bg-black text-white hover:underline underline-offset-4 font-normal text-xs md:text-sm'
+              className='bg-foreground text-background hover:bg-background hover:text-foreground'
               triggerIconName='FileQuestionIcon'
               triggerIconClass='w-4 h-4'
               confirmText="Yes"
               cancelText="No"
-            // Set restProps if needed
             />
           )}
 
-          {/* Open Markdown File Button */}
           <FileInput
             onFileSelect={handleFileSelect}
             accept=".md"
             size="icon"
-            className='bg-black hover:bg-gray-50 hover:text-black'
+            className='bg-foreground text-background hover:bg-background hover:text-foreground'
             title="Open Markdown File"
             hideText
           />
 
-          {/* Clear Editor Button with Confirmation Dialog */}
           <ConfirmationModal
             title="Clear Editor?"
             message="It will delete all the content in the editor."
             onConfirm={handleClear}
-            className='bg-black hover:bg-gray-50 hover:text-black'
+            className='bg-foreground text-background hover:bg-background hover:text-foreground'
             triggerIconClass="w-4 h-4"
             triggerIconName='Trash2Icon'
             confirmText='Clear'
           />
 
-          {/* FullScreen Control Button */}
           <Button
-            className='bg-black hover:bg-gray-50 hover:text-black'
+            className='bg-foreground text-background hover:bg-background hover:text-foreground'
             size='icon'
             title='Toggle Full Screen'
             onClick={handleToggleFullScreen}
           >
-            {isFullScreen ? <ShrinkIcon className="w-4 h-4" /> : <ExpandIcon className="w-4 h-4" />}
+            {isFullScreen ? <ShrinkIcon className="h-4 w-4" /> : <ExpandIcon className="h-4 w-4" />}
           </Button>
         </section>
       </header>
 
-      {/* Markdown Editor */}
-      <main className=''>
+      <main>
         <textarea
-          className="w-full h-[calc(100vh-200px)] p-4 border border-black rounded scrollbar-hide"
+          className="field-input h-[calc(100vh-240px)] rounded-xl p-4 font-mono scrollbar-hide"
           value={value}
           onChange={handleChange}
           placeholder="Enter your markdown here..."
+          aria-label="Markdown editor"
         />
       </main>
 
-      {/* Only display when full screen */}
       {isFullScreen &&
         <footer>
-          <Button type='button' size='sm' onClick={modeToggle} className='max-w-lg my-2 mx-auto w-36'>
+          <Button type='button' size='sm' onClick={modeToggle} className='mx-auto my-2 w-36 max-w-lg'>
             Preview
           </Button>
         </footer>

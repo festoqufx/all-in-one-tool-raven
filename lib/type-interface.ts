@@ -4,7 +4,10 @@ export interface AppLinkProps {
     href: string;
     icon?: string;
     label: string;
+    shortLabel?: string;
     description?: string;
+    category?: string;
+    keywords?: string;
 }
 
 export interface ITabsData {

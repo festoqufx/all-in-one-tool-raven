@@ -1,4 +1,6 @@
 
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Clipboard } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -33,7 +35,8 @@ export const PasteFile: React.FC<PasteFileProps> = ({ processFile, setErrorMessa
         }
 
         if (!imageFound) {
-            setErrorMessage('No image found in clipboard.')
+            // Ignore non-image pastes so typing/clipboard text is not treated as an error.
+            return;
         }
     }, [processFile, setErrorMessage])
 
@@ -85,7 +88,7 @@ export const PasteButton: React.FC<PasteButtonProps> = ({ onPasteClick, classNam
         <Button
             variant="ghost"
             onClick={onPasteClick}
-            className={cn('rounded border border-gray-400 hover:bg-gray-100 hover:border-gray-500', className)}
+            className={cn('rounded-full border border-border hover:border-foreground hover:bg-accent', className)}
         >
             <Clipboard className="w-4 h-4" />
             <span className="hidden sm:inline ml-2">{children || 'Paste'}</span>

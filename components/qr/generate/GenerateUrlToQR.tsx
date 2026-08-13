@@ -53,27 +53,16 @@ export const GenerateUrlToQR: React.FC = () => {
           return;
         }
 
-        // Accept known protocols
-        const hasProtocol =
-          url.startsWith('http://') ||
-          url.startsWith('https://') ||
-          url.startsWith('ftp://') ||
-          url.startsWith('mailto:') ||
-          url.startsWith('tel:');
-
-        let normalizedUrl = url;
-
-        // Auto-prepend protocol if missing
+        let normalizedUrl = url.trim();
+        const hasProtocol = /^(https?|ftp|mailto|tel):/i.test(normalizedUrl);
         if (!hasProtocol) {
-          const isValidDomain = /^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/;
-          if (!isValidDomain.test(url)) {
-            throw new Error('Invalid domain name');
-          }
-          normalizedUrl = `http://${url}`;
+          normalizedUrl = `https://${normalizedUrl}`;
         }
 
-        // Validate using URL constructor
         const parsed = new URL(normalizedUrl);
+        if (parsed.protocol.startsWith("http") && !parsed.hostname.includes(".")) {
+          throw new Error("Invalid domain name");
+        }
         setParsedUrl(parsed.href);
         setFormattedUrl(normalizedUrl);
         setIsValid(true);
@@ -96,7 +85,7 @@ export const GenerateUrlToQR: React.FC = () => {
     <article className="grid w-full grid-cols-1 md:grid-cols-2">
       {/* Left: URL Input */}
       <section className="w-full">
-        <label htmlFor="url-input" className="font-medium text-sm text-gray-600">
+        <label htmlFor="url-input" className="field-label">
           Enter a valid URL
         </label>
         <input
@@ -105,13 +94,13 @@ export const GenerateUrlToQR: React.FC = () => {
           id="url-input"
           placeholder="https://example.com"
           onChange={(e) => setUrl(e.target.value)}
-          className="w-full border border-gray-500 p-2 rounded mt-1"
+          className="field-input mt-1"
         />
 
         {/* URL Preview or Validation Message */}
         {isValid ? (
           <a
-            className="text-xs opacity-50 hover:text-blue-800 hover:underline underline-offset-4 py-1 flex items-center"
+            className="flex items-center py-1 text-xs text-muted-foreground underline-offset-4 hover:underline"
             href={parsedUrl}
             target="_blank"
             rel="noopener noreferrer"
@@ -122,11 +111,11 @@ export const GenerateUrlToQR: React.FC = () => {
             </span>
           </a>
         ) : url.length > 0 ? (
-          <p className="text-xs text-red-500 py-1">Invalid URL</p>
+          <p className="text-xs text-destructive py-1">Invalid URL</p>
         ) : null}
 
         {/* Full Error Message */}
-        {error && <p className="text-red-500 text-xs lg:text-sm py-2">{error}</p>}
+        {error && <p className="text-destructive text-xs lg:text-sm py-2">{error}</p>}
       </section>
 
       {/* Right: QR Code Display */}

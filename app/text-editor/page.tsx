@@ -16,7 +16,7 @@ export default function TextEditorHomePage() {
             <h1 className='sr-only'>{metadata.title as string}</h1>
             <h2 className='sr-only'>{metadata.description as string}</h2>
 
-            <div className="min-h-screen flex items-center justify-center">
+            <div className="py-4">
                 <TextEditor />
             </div>
         </main>

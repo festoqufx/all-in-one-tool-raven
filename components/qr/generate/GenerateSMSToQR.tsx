@@ -39,14 +39,11 @@ export const GenerateSMSToQR: React.FC = () => {
    * @returns The formatted SMS URI string.
    */
   const generateSMSContent = (): string => {
-    // Ensure the phone number starts with '+'
-    const phoneNumber = sms.number.startsWith('+') ? sms.number : `+${sms.number}`;
-    // Encode the message
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const encodedMessage = encodeURIComponent(sms.message);
-
-    // Generate the SMSTO URL
-    return `SMSTO:${phoneNumber}:"${sms.message}"`;
+    const phoneNumber = sms.number.startsWith("+") ? sms.number : `+${sms.number}`;
+    const params = new URLSearchParams();
+    if (sms.message.trim()) params.set("body", sms.message.trim());
+    const query = params.toString();
+    return query ? `sms:${phoneNumber}?${query}` : `sms:${phoneNumber}`;
   };
 
 
@@ -55,39 +52,39 @@ export const GenerateSMSToQR: React.FC = () => {
     <>
       <article className="grid w-full grid-cols-1 md:grid-cols-2">
         <section className='w-full md:min-h-80 '>
-          <p className='font-medium text-xs text-gray-600 flex gap-2 mb-2.5'>
+          <p className='mb-2.5 flex gap-2 text-xs font-medium text-muted-foreground'>
             <InfoCircledIcon />
             Fill all necessary information to generate SMS QR code
           </p>
 
           <div className="space-y-2">
-            <label htmlFor="sms-number" className='font-medium text-sm text-gray-600'>Phone Number</label>
+            <label htmlFor="sms-number" className='field-label'>Phone Number</label>
             <input
               id="sms-number"
               type="tel"
-              className="w-full border border-gray-500 p-2 rounded"
+              className="field-input"
               value={sms.number}
               onChange={(e) => setSMS({ ...sms, number: e.target.value })}
               placeholder="+1234567890"
             />
             {!isValidPhoneNumber(sms.number) && sms.number && (
-              <p className="text-red-500 text-xs lg:text-sm">Please enter a valid phone number with <strong>country code</strong>.</p>
+              <p className="text-xs text-destructive lg:text-sm">Please enter a valid phone number with <strong>country code</strong>.</p>
             )}
           </div>
           <div className="space-y-2">
-            <label htmlFor="sms-message" className='font-medium text-sm text-gray-600'>Message</label>
+            <label htmlFor="sms-message" className='field-label'>Message</label>
             <textarea
               id="sms-message"
               value={sms.message}
               placeholder="SMS Message"
-              className="w-full border border-gray-500 p-2 rounded"
+              className="field-input"
               onChange={(e) => setSMS({ ...sms, message: e.target.value })}
             />
           </div>
         </section>
         <section className='w-full min-h-80 flex flex-col items-center justify-center'>
           {/* Generate QR Code */}
-          {isValidPhoneNumber(sms.number) && sms.message ? (
+          {isValidPhoneNumber(sms.number) ? (
             <QRCode
               value={generateSMSContent()}
               size={250}

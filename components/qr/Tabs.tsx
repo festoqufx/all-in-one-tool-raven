@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { usePathname } from 'next/navigation';
 import { ITabsData } from "@/lib/type-interface";
@@ -13,22 +13,26 @@ interface GenerateTabsProps {
     options: ITabsData[];
 }
 
-/**
- * `GenerateTabs` is a functional React component that renders a tabbed interface.
- * 
- * @param {GenerateTabsProps} props - The properties for the component.
- * @param {ITabsData[]} props.options - An array of tab options, where each option contains text for the tab and content to display in the tab panel.
- * 
- * @returns {JSX.Element} The rendered tabbed interface.
- */
 const GenerateTabs: React.FC<GenerateTabsProps> = ({ options }) => {
-    // Initialize the active tab based on the first option
     const [activeTab, setActiveTab] = useState(options[0].text.toLowerCase());
+
+    useEffect(() => {
+        const stored = window.localStorage.getItem("qr-generator-tab");
+        if (stored && options.some((option) => option.text.toLowerCase() === stored)) {
+            setActiveTab(stored);
+        }
+        // Restore last used generator tab once on mount.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const selectTab = (tab: string) => {
+        setActiveTab(tab);
+        window.localStorage.setItem("qr-generator-tab", tab);
+    };
 
     return (
         <>
-            {/* Tab Buttons */}
-            <section className="flex flex-wrap items-center justify-center max-w-full">
+            <section className="flex max-w-full flex-wrap items-center justify-center" role="tablist">
                 {options.map((option) => {
                     const tabId = `tab-${option.text.toLowerCase()}`;
                     const panelId = `tabpanel-${option.text.toLowerCase()}`;
@@ -41,11 +45,13 @@ const GenerateTabs: React.FC<GenerateTabsProps> = ({ options }) => {
                             role="tab"
                             aria-selected={isActive}
                             aria-controls={panelId}
-                            onClick={() => setActiveTab(option.text.toLowerCase())}
-                            className={`px-4 border m-1 py-2 text-sm font-medium focus:outline-none uppercase ${isActive
-                                ? "border-b-2 bg-black text-white"
-                                : "text-black bg-white border-black"
-                                }`}
+                            onClick={() => selectTab(option.text.toLowerCase())}
+                            className={cn(
+                                "m-1 rounded-full border px-4 py-2 text-sm font-medium uppercase tracking-wide focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                                isActive
+                                    ? "border-foreground bg-foreground text-background"
+                                    : "border-border bg-background text-foreground hover:border-foreground"
+                            )}
                         >
                             {option.text}
                         </button>
@@ -53,7 +59,6 @@ const GenerateTabs: React.FC<GenerateTabsProps> = ({ options }) => {
                 })}
             </section>
 
-            {/* Tab Panels */}
             <section>
                 {options
                     .filter(option => option.text.toLowerCase() === activeTab)
@@ -72,31 +77,17 @@ const GenerateTabs: React.FC<GenerateTabsProps> = ({ options }) => {
     );
 };
 
-
-
 interface GenerateLinkTabsProps {
     tabs: ILinkTabsData[];
     className?: string;
     activeClassName?: string;
 }
 
-/**
- * `GenerateLinkTabs` is a functional React component that renders a set of tab links.
- * Each tab link navigates to a different route, and the active tab is styled differently based on the current route.
- * 
- * @param {GenerateLinkTabsProps} props - The properties for the component.
- * @param {ILinkTabsData[]} props.tabs - An array of tab objects where each object contains:
- *   - `label` (string): The text to display on the tab.
- *   - `href` (string): The URL to navigate to when the tab is clicked.
- * 
- * @returns {JSX.Element} The rendered set of tab links.
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default function GenerateLinkTabs({ tabs, className, activeClassName }: GenerateLinkTabsProps) {
+export default function GenerateLinkTabs({ tabs }: GenerateLinkTabsProps) {
     const pathname = usePathname()
 
     return (
-        <Tabs value={pathname} className="container w-full mx-auto">
+        <Tabs value={pathname} className="container mx-auto w-full">
             <TabsList className="grid w-full grid-cols-2">
                 {tabs.map((tab) => (
                     <TabsTrigger key={tab.label} value={tab.href} asChild>
@@ -109,23 +100,22 @@ export default function GenerateLinkTabs({ tabs, className, activeClassName }: G
 }
 
 const GenerateLinkTabs2: React.FC<GenerateLinkTabsProps> = ({ tabs, className, activeClassName }) => {
-    // Get the current pathname from the Next.js navigation context
     const pathname = usePathname();
 
     return (
-        <article className="w-full bg-black p-2 flex items-center justify-center gap-1">
+        <article className="flex w-full items-center justify-center gap-1 rounded-full bg-foreground p-2">
             {tabs.map((tab) => (
                 <Link key={tab.label} href={tab.href} legacyBehavior>
                     <a
                         className={cn(
-                            "py-2 px-4 font-bold bg-gray-100 flex items-center gap-1 border rounded",
+                            "flex items-center gap-1 rounded-full border px-4 py-2 font-bold",
                             pathname === tab.href ?
-                                `border-b-4 border-gray-500 text-gray-500 ${activeClassName}` :
-                                `border-b-4 border-gray-700 text-gray-700 bg-white hover:text-blue-500 hover:border-blue-500`,
+                                `border-background bg-background text-foreground ${activeClassName}` :
+                                `border-transparent bg-transparent text-background/80 hover:text-background`,
                             className
                         )}
                     >
-                        {pathname === tab.href ? <CircleDotIcon strokeWidth={3} className="w-4 h-4" /> : <CircleIcon className="w-4 h-4 opacity-50" />}
+                        {pathname === tab.href ? <CircleDotIcon strokeWidth={3} className="h-4 w-4" /> : <CircleIcon className="h-4 w-4 opacity-50" />}
                         {tab.label}
                     </a>
                 </Link>

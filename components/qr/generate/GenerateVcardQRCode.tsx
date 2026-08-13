@@ -146,25 +146,25 @@ export default function GenerateVcardQRCode() {
         <>
             <article className="grid w-full grid-cols-1 md:grid-cols-2">
                 <section className='w-full md:min-h-80 '>
-                    <p className='font-medium text-xs text-gray-600 flex gap-2 mb-2.5'>
+                    <p className='mb-2.5 flex gap-2 text-xs font-medium text-muted-foreground'>
                         <InfoCircledIcon />
                         Fill all necessary information to generate VCARD QR Code
                     </p>
                     {/* Render input fields for contact information */}
                     {fields.map(({ id, name, type, placeholder, label, isValid = true, errorMessage }) => (
                         <div key={id} className="space-y-2">
-                            <label htmlFor={id} className='font-medium text-sm text-gray-600'>{label}</label>
+                            <label htmlFor={id} className='field-label'>{label}</label>
                             <input
                                 id={id}
                                 name={name}
                                 type={type}
                                 value={contact[name as keyof GenerateVcardQRCodeProps]}
                                 onChange={handleInputChange}
-                                className="w-full border border-gray-500 p-2 rounded"
+                                className="field-input"
                                 placeholder={placeholder}
                             />
                             {!isValid && errorMessage && (
-                                <p className="text-red-500 text-xs lg:text-sm">{errorMessage}</p>
+                                <p className="text-xs text-destructive lg:text-sm">{errorMessage}</p>
                             )}
                         </div>
                     ))}

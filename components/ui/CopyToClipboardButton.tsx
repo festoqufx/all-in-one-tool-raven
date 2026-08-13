@@ -1,98 +1,77 @@
 "use client";
 
-import React, { useState } from 'react';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { CopyIcon, CopyCheckIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React, { useState } from "react";
+import { CopyIcon, CopyCheckIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-/**
- * Props for the CopyToClipboardButton component.
- */
 interface CopyToClipboardButtonProps {
-    /**
-     * The text to be copied to the clipboard.
-     */
-    data?: string;
-
-    /**
-     * If true, only the text will be displayed, ignoring the icon.
-     */
-    textOnly?: boolean;
-
-    /**
-     * The text displayed on the button.
-     * If `textOnly` is false (default), this prop will be ignored.
-     */
-    buttonText?: string;
-
-    /**
-     * Optional additional class names to be applied to the root <div> element.
-     */
-    className?: string;
-
-    /**
-     * Optional additional class names to be applied to the copy icon.
-     */
-    copyIconClassName?: string;
-
-    /**
-     * Optional additional class names to be applied to the text element.
-     */
-    textClassName?: string;
+  data?: string;
+  textOnly?: boolean;
+  buttonText?: string;
+  className?: string;
+  copyIconClassName?: string;
+  textClassName?: string;
 }
 
-/**
- * A button component that copies text to the clipboard when clicked.
- * Displays a copy icon initially and a check icon once the text is copied.
- * The button text and icon visibility can be customized via props.
- *
- * @param {CopyToClipboardButtonProps} props - The props for the component.
- * @returns {JSX.Element} The rendered button component.
- */
 export const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
-    data: textToCopy,
-    buttonText,
-    textOnly = false,
-    className,
-    copyIconClassName,
-    textClassName
+  data: textToCopy,
+  buttonText,
+  textOnly = false,
+  className,
+  copyIconClassName,
+  textClassName,
 }) => {
-    const [isCopied, setIsCopied] = useState<boolean>(false);
+  const [isCopied, setIsCopied] = useState(false);
 
-    /**
-     * Handles the copy action and updates the copied state.
-     * Resets the copied state after 2 seconds.
-     */
-    const handleCopy = () => {
-        setIsCopied(true);
-        setTimeout(() => setIsCopied(false), 2000); // Reset the copy status after 2 seconds
-    };
+  const handleCopy = async () => {
+    const value = textToCopy || "";
+    if (!value) return;
 
-    return (
-        <div>
-            <CopyToClipboard text={textToCopy || ''} onCopy={handleCopy}>
-                <button
-                    type='button'
-                    title={isCopied ? 'Copied!' : 'Copy to Clipboard'}
-                    className={cn('inline-flex gap-x-2 items-center p-1.5 border border-transparent', className)}
-                >
-                    {buttonText && (
-                        <span className={cn(isCopied ? 'animate-pulse' : '', textClassName)}>
-                            {buttonText}
-                        </span>
-                    )}
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(value);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = value;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "absolute";
+        textarea.style.left = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
+      setIsCopied(true);
+      window.setTimeout(() => setIsCopied(false), 2000);
+    } catch (error) {
+      console.error("Copy failed:", error);
+    }
+  };
 
-                    {!textOnly && (
-                        isCopied ? (
-                            <CopyCheckIcon className={cn("w-5 h-5", copyIconClassName)} />
-                        ) : (
-                            <CopyIcon className={cn("w-5 h-5 opacity-70", copyIconClassName)} />
-                        )
-                    )}
-                </button>
-            </CopyToClipboard>
-        </div>
-    );
+  return (
+    <button
+      type="button"
+      title={isCopied ? "Copied!" : "Copy to Clipboard"}
+      onClick={handleCopy}
+      disabled={!textToCopy}
+      className={cn(
+        "inline-flex items-center gap-x-2 border border-transparent p-1.5 disabled:cursor-not-allowed disabled:opacity-50",
+        className
+      )}
+    >
+      {buttonText && (
+        <span className={cn(isCopied ? "animate-pulse" : "", textClassName)}>
+          {isCopied ? "Copied" : buttonText}
+        </span>
+      )}
+      {!textOnly &&
+        (isCopied ? (
+          <CopyCheckIcon className={cn("h-5 w-5", copyIconClassName)} />
+        ) : (
+          <CopyIcon className={cn("h-5 w-5 opacity-70", copyIconClassName)} />
+        ))}
+    </button>
+  );
 };
 
 export default CopyToClipboardButton;
